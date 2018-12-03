@@ -13,7 +13,7 @@ namespace Day3
             var maxWidth = claims.Max(s => s.Left + s.Width);
             var maxHeight = claims.Max(s => s.Top + s.Height);
 
-            var squares = new short[maxWidth + 1, maxHeight + 1];
+            var squares = new short[maxWidth, maxHeight];
 
             var answer = 0;
             foreach (var claim in claims)
@@ -36,6 +36,7 @@ namespace Day3
                     }
                 }
             }
+            //116140
             Console.WriteLine(answer);
 
             foreach (var claim in claims)
@@ -55,35 +56,6 @@ namespace Day3
                 }
             }
 
-
-
         }
-
-        //1@287,428:27x20
-    }
-
-    class Claim
-    {
-        public Claim(string line)
-        {
-            line = line
-                    .Replace(" ", "")
-                    .Replace("#", "");
-
-            Id = int.Parse(line.Split('@')[0]);
-            var locationAndsize = line.Split('@')[1];
-            var location = locationAndsize.Split(':')[0];
-            var size = locationAndsize.Split(':')[1];
-            Left = int.Parse(location.Split(',')[0]);
-            Top = int.Parse(location.Split(',')[1]);
-            Width = int.Parse(size.Split('x')[0]);
-            Height = int.Parse(size.Split('x')[1]);
-        }
-
-        public int Id { get; set; }
-        public int Left { get; set; }
-        public int Top { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
     }
 }
