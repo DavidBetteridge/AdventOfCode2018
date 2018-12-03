@@ -1449,6 +1449,24 @@ INSERT INTO dbo.Claims (ID, [Left], [Top], Width, Height) SELECT 1397,888,761, 2
 GO
 
 
+DECLARE @ClaimID AS INTEGER
+
+SELECT @ClaimID = MIN(ID) FROM dbo.Claims
+
+WHILE @ClaimID <= (SELECT MAX(ID) FROM dbo.Claims)
+BEGIN
+	UPDATE Cloth 
+	   SET Cloth.NumberOfClaims = NumberOfClaims + 1
+      FROM dbo.Claims CL
+	  JOIN dbo.Cloth Cloth ON Cloth.X BETWEEN CL.[Left] AND CL.EndX
+						  AND Cloth.Y BETWEEN CL.[Top] AND CL.EndY
+	 WHERE CL.ID = @ClaimID
+
+	SET @ClaimID = @ClaimID + 1
+END
+GO
+
+
 
 UPDATE C
    SET C.NumberOfClaims = (SELECT COUNT(*) 
