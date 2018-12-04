@@ -4,21 +4,30 @@ namespace Day4
 {
     class Shift
     {
+        public int Guard { get; set; }
+        public Event EventOnShift { get; }
+        public DateTime EventDate { get; }
 
+        public enum Event
+        {
+            BeginsShift = 0,
+            FallsAsleep = 1,
+            WakesUp = 2
+        }
         public Shift(string line)
         {
             var parser = new Parser(line);
 
             parser.Match('[');
-            Year = parser.ReadNextInt();
+            var Year = parser.ReadNextInt();
             parser.Match('-');
-            Month = parser.ReadNextInt();
+            var Month = parser.ReadNextInt();
             parser.Match('-');
-            Day = parser.ReadNextInt();
+            var Day = parser.ReadNextInt();
             parser.Match(' ');
-            Hour = parser.ReadNextInt();
+            var Hour = parser.ReadNextInt();
             parser.Match(':');
-            Minute = parser.ReadNextInt();
+            var Minute = parser.ReadNextInt();
             parser.Match(']');
             parser.Match(' ');
 
@@ -43,21 +52,6 @@ namespace Day4
             }
         }
 
-        public int Minute { get; }
-        public int Hour { get; }
-        public int Day { get; }
-        public int Month { get; }
-        public int Year { get; }
-        public int Guard { get; set; }
 
-        public Event EventOnShift { get; }
-        public DateTime EventDate { get; }
-
-        public enum Event
-        {
-            BeginsShift = 0,
-            FallsAsleep = 1,
-            WakesUp = 2
-        }
     }
 }
