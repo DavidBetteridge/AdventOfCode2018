@@ -16,46 +16,25 @@ namespace Day6
             var maxX = coordinates.Max(c => c.X);
             var maxY = coordinates.Max(c => c.Y);
 
-            var nearest = new List<int>();
-            for (int x = minX; x <= maxX; x++)
-            {
-                for (int y = minY; y <= maxY; y++)
-                {
-                    nearest.Add(Closest(x, y, coordinates));
-                }
-            }
-
-            //var nearest = Enumerable.Range(minX, maxX - minX)
-            //                .SelectMany(x => Enumerable.Range(minY, maxY - minY)
-            //                .Select(y => Closest(x, y, coordinates)));
-            var bbbb = nearest.Count();
+            var nearest = Enumerable.Range(minX, maxX - minX)
+                            .SelectMany(x => Enumerable.Range(minY, maxY - minY)
+                            .Select(y => Closest(x, y, coordinates)));
 
             var infiniteTop = Enumerable.Range(minX, maxX - minX).Select(x => Closest(x, minY, coordinates)).Distinct();
             var infiniteBottom = Enumerable.Range(minX, maxX - minX).Select(x => Closest(x, maxY, coordinates)).Distinct();
             var infiniteLeft = Enumerable.Range(minY, maxY - minY).Select(y => Closest(minX, y, coordinates)).Distinct();
             var infiniteRight = Enumerable.Range(minY, maxY - minY).Select(y => Closest(maxX, y, coordinates)).Distinct();
-            var infinites = infiniteTop.Union(infiniteBottom).Union(infiniteLeft).Union(infiniteRight);
+            var infinite = infiniteTop.Union(infiniteBottom).Union(infiniteLeft).Union(infiniteRight);
 
-
-            var grouped = nearest.GroupBy(a => a);
-            bbbb = grouped.Count();
-
-            var possibles = new List<IGrouping<int,int>>();
-            foreach (var item in grouped)
-            {
-                if (!infinites.Any(i => item.Key == i))
-                {
-                    possibles.Add(item);
-                }
-            }
-
-                       
-            var sorted = possibles.OrderByDescending(a => a.Count());
-            //bbbb = sorted.Count();
-
-            var part1 = sorted.First().Count();
-
+            var part1 = nearest
+                            .GroupBy(Identity)
+                            .Where(item => !infinite.Any(i => item.Key == i))
+                            .OrderByDescending(a => a.Count())
+                            .First()
+                            .Count();
         }
+
+        static T Identity<T>(T thing) => thing;
 
         private static int Closest(int x, int y, IEnumerable<Coordinate> coordinates)
         {
