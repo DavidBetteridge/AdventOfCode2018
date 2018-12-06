@@ -30,8 +30,7 @@ namespace Day6
             var regionSize = Enumerable.Range(minX, maxX - minX)
                                         .SelectMany(x => Enumerable.Range(minY, maxY - minY)
                                         .Select(y => TotalDistanceTo(new Coordinate(x, y))))
-                                        .Where(distance => distance < TargetDistance)
-                                        .Count();
+                                        .Count(distance => distance < TargetDistance);
 
         }
         private static void Part1()
