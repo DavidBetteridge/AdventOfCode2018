@@ -24,7 +24,7 @@ namespace Day4
 
             var part2 = SolvePartTwo(minutesByGuard);
 
-        -1}
+        }
 
         private static int SolvePartTwo(Dictionary<int, int[]> minutesByGuard)
         {
