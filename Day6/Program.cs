@@ -7,6 +7,35 @@ namespace Day6
     {
         static void Main(string[] args)
         {
+            Part2();
+        }
+
+        private static void Part2()
+        {
+            var coordinates = System.IO.File.ReadAllLines("Coordinates.txt")
+                                            .Select((line, index) => Coordinate.ParseLine(line, index))
+                                            .ToArray();
+
+            const int TargetDistance = 10000;
+            var numberOfCoordinates = coordinates.Count();
+            var maxGridSize = TargetDistance / numberOfCoordinates;
+
+            var minX = coordinates.Min(c => c.X) - maxGridSize;
+            var minY = coordinates.Min(c => c.Y) - maxGridSize;
+            var maxX = coordinates.Max(c => c.X) + maxGridSize;
+            var maxY = coordinates.Max(c => c.Y) + maxGridSize;
+
+            int TotalDistanceTo(Coordinate coordinate) => coordinates.Sum(otherCoordinate => coordinate - otherCoordinate);
+
+            var regionSize = Enumerable.Range(minX, maxX - minX)
+                                        .SelectMany(x => Enumerable.Range(minY, maxY - minY)
+                                        .Select(y => TotalDistanceTo(new Coordinate(x, y))))
+                                        .Where(distance => distance < TargetDistance)
+                                        .Count();
+
+        }
+        private static void Part1()
+        {
             var coordinates = System.IO.File.ReadAllLines("Coordinates.txt")
                                             .Select((line, index) => Coordinate.ParseLine(line, index))
                                             .ToArray();
@@ -35,6 +64,9 @@ namespace Day6
         }
 
         static T Identity<T>(T thing) => thing;
+
+
+
 
         private static int Closest(int x, int y, IEnumerable<Coordinate> coordinates)
         {

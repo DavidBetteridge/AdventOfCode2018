@@ -8,7 +8,7 @@ namespace Day6
         public int Y { get; }
         public int Index { get; }
 
-        public Coordinate(int x, int y, int index)
+        public Coordinate(int x, int y, int index = -1)
         {
             X = x;
             Y = y;
@@ -20,7 +20,7 @@ namespace Day6
         internal static Coordinate ParseLine(string line, int index)
         {
             var parts = line.Split(new string[] { ", " }, StringSplitOptions.None);
-            return new Coordinate(int.Parse(parts[0]), 
+            return new Coordinate(int.Parse(parts[0]),
                                   int.Parse(parts[1]),
                                   index);
         }
