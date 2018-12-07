@@ -6,6 +6,7 @@ interface Dictionary<T> {
 
 export class Dependencies {
     SearchFor: Dictionary<string[]> = {};
+    Count: number = 0;
 }
 
 
@@ -49,6 +50,7 @@ class Loader {
             {
                 dependsOn = new Array(0);
                 dependencies.SearchFor[step.toStep] = dependsOn;                   
+                dependencies.Count++;
             }
             dependsOn.push(step.fromStep);    
    
@@ -56,6 +58,7 @@ class Loader {
             if (typeof fromStep === "undefined")
             {
                 dependencies.SearchFor[step.fromStep] = new Array(0);                   
+                dependencies.Count++;
             }
 
         });
@@ -65,20 +68,42 @@ class Loader {
 
 }
 
-// let myData = {};
-// for (let myObj of this.getAllData()) {
-//     let name = myObj.name;
-//     if (!myData[name]){
-//         myData[name] = name;
-//     }
-// }
-
-
 class Startup {
     public static main(): number {
 
         var loader = new Loader();
-        loader.Load();
+        var dependencies = loader.Load();
+
+        var answer = "";
+        while (dependencies.Count > 0)
+        {
+            var possible:string[] = new Array(0);
+            Object.keys(dependencies.SearchFor).forEach(d => {
+                var dependsOn = dependencies.SearchFor[d];
+                if (dependsOn.length == 0) {
+                    possible.push(d);
+                }
+            });
+            var next = possible.sort((one, two) => (one > two ? 1 : -1))[0];
+
+            Object.keys(dependencies.SearchFor).forEach(d => {
+                var dependsOn = dependencies.SearchFor[d];
+                
+                var index: number = dependsOn.indexOf(next, 0);
+                if (index > -1) {
+                    dependsOn.splice(index, 1);
+                    dependencies.SearchFor[d] = dependsOn;
+                }
+            });
+
+            delete dependencies.SearchFor[next];    
+            dependencies.Count--;
+
+            answer += next;     
+        }
+
+        console.log(answer);
+
         return 0;
     }
 }
