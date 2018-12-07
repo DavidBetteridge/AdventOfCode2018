@@ -28,13 +28,11 @@ namespace Day7
                 }
 
                 dependencies.Remove(possible);
-
                 answer += possible;
             }
 
             return answer;
         }
-
 
         static int Part2()
         {
@@ -44,7 +42,6 @@ namespace Day7
 
             var dependencies = WorkoutDependencies("steps.txt");
 
-            var done = "";
             var timeTaken = 0;
             while (dependencies.Any() || workers.Any(w => w.TimeRemaining > 0))
             {
@@ -60,9 +57,6 @@ namespace Day7
                                 item.Remove(worker.CurrentActivity);
                             }
                         }
-
-                        done += worker.CurrentActivity;
-
                         worker.CurrentActivity = "";
                     }
                 }
