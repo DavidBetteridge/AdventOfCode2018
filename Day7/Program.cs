@@ -97,15 +97,10 @@ namespace Day7
                     depends.Add(step.ToStep, dependsOn);
                 }
                 dependsOn.Add(step.FromStep);
-            }
 
-            var firsts = allSteps.Where(s => !depends.ContainsKey(s));
-            foreach (var first in firsts)
-            {
-                var dependsOn = new List<string>();
-                depends.Add(first, dependsOn);
+                if (!depends.ContainsKey(step.FromStep))
+                    depends.Add(step.FromStep, new List<string>());
             }
-
             return depends;
         }
 
