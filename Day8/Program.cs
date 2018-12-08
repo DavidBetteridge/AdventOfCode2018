@@ -17,6 +17,23 @@ namespace Day8
             Console.ReadKey();
         }
 
+        private static int Part1(Node input)
+        {
+            var sumOfChildren = input.Children.Select(c => Part1(c)).Sum();
+            return input.MetaData.Sum() + sumOfChildren;
+        }
+
+        private static int Part2(Node input)
+        {
+            if (input.NumberOfChildNodes == 0)
+                return input.MetaData.Sum();
+
+            return input.MetaData
+                        .Where(childNumber => childNumber > 0 && childNumber <= input.NumberOfChildNodes)
+                        .Select(childNumber => input.Children[childNumber - 1])
+                        .Sum(child => Part2(child));
+        }
+
         private static Node ReadNode(Parser parser)
         {
             var node = new Node();
@@ -42,37 +59,7 @@ namespace Day8
             return node;
         }
 
-        private static int Part1(Node input)
-        {
-            var sumOfChildren = input.Children.Select(c => Part1(c)).Sum();
-            return input.MetaData.Sum() + sumOfChildren;
-        }
 
-        private static int Part2(Node input)
-        {
-            if (input.NumberOfChildNodes == 0)
-            {
-                return input.MetaData.Sum();
-            }
-            else
-            {
-                var result = 0;
-                for (int metaDataEntry = 0; metaDataEntry < input.NumberOfMetaDataEntries; metaDataEntry++)
-                {
-                    var childNumber = input.MetaData[metaDataEntry];
-                    if (childNumber > 0)
-                    {
-                        if (childNumber <= input.NumberOfChildNodes)
-                        {
-                            var child = input.Children[childNumber - 1];
-                            result += Part2(child);
-                        }
-                    }
-                }
-                return result;
-            }
-
-        }
 
     }
 
