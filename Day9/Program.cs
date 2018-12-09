@@ -8,16 +8,16 @@ namespace Day9
     {
         static void Main(string[] args)
         {
-            var sw = new Stopwatch();
+            //var sw = new Stopwatch();
 
           //  var part1 = Solve(476, 71657);
-            sw.Start();
+           // sw.Start();
             var part2 = Solve(476, 7165700);
-            sw.Stop();
+         //   sw.Stop();
 
           //  Console.WriteLine($"Part 1 ==>  {part1}"); //386018
-            Console.WriteLine($"Part 2 ==>  {part2} in {sw.ElapsedMilliseconds}ms"); //3085518618
-            Console.ReadKey();
+            //Console.WriteLine($"Part 2 ==>  {part2} in {sw.ElapsedMilliseconds}ms"); //3085518618
+       //     Console.ReadKey();
         }
 
         private static long Solve(int numberOfPlayers, int numberOfMarbles)

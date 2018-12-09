@@ -19,6 +19,18 @@ namespace Day4
             _offset++;
         }
 
+        internal void Match(string text)
+        {
+            if (_line.Length >= (_offset + text.Length) &&
+                _line.Substring(_offset, text.Length) == text)
+            {
+                _offset += text.Length;
+                return;
+            }
+
+            throw new Exception($"Could not find {text}");
+        }
+
         internal int ReadNextInt()
         {
             var numberAsText = "";
