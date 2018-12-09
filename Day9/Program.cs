@@ -10,12 +10,12 @@ namespace Day9
         {
             var sw = new Stopwatch();
 
-            var part1 = Solve(476, 71657);
+          //  var part1 = Solve(476, 71657);
             sw.Start();
-            var part2 = Solve(476, 71657 * 100);
+            var part2 = Solve(476, 7165700);
             sw.Stop();
 
-            Console.WriteLine($"Part 1 ==>  {part1}"); //386018
+          //  Console.WriteLine($"Part 1 ==>  {part1}"); //386018
             Console.WriteLine($"Part 2 ==>  {part2} in {sw.ElapsedMilliseconds}ms"); //3085518618
             Console.ReadKey();
         }

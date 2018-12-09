@@ -2,9 +2,10 @@
 {
     class Circle
     {
-        private int[] _values;
-        private int[] _next;
-        private int[] _previous;
+        private readonly int[] _values;
+        private readonly int[] _next;
+        private readonly int[] _previous;
+
         private int _current;
         private int _nextSlot;
 
@@ -53,8 +54,12 @@
 
         internal int RemoveMarbles(int marble)
         {
-            for (int i = 0; i < 6; i++)
-                _current = _previous[_current];
+            _current = _previous[_current];
+            _current = _previous[_current];
+            _current = _previous[_current];
+            _current = _previous[_current];
+            _current = _previous[_current];
+            _current = _previous[_current];
 
             var sevenBack = _previous[_current];
 
