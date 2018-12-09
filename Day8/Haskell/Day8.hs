@@ -10,12 +10,13 @@ import Text.Read
 import Data.Char
 
 main = do  
-    handle <- openFile "Sample.txt" ReadMode  
+    handle <- openFile "Input.txt" ReadMode  
     hSetEncoding handle utf8_bom
     contents <- hGetContents handle  
-    putStr contents  
+    let (_, n) = buildNode contents 0
+    let answer = sumMetaData n
+    putStr $ show answer  
     hClose handle  
-
 
 data Node = Node { numberOfChildNodes :: Int, 
                    amountOfMetaData ::Int, 
