@@ -1,72 +1,67 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Day9
+﻿namespace Day9
 {
     class Circle
     {
-        private readonly LinkedList<int> _marbles;
-        private LinkedListNode<int> _current;
-        public Circle(int maxSize)
+        private int[] _values;
+        private int[] _next;
+        private int[] _previous;
+        private int _current;
+        private int _nextSlot;
+
+        public Circle(int numberOfMarbles)
         {
-            _marbles = new LinkedList<int>();
-            _current = new LinkedListNode<int>(0);
-            _marbles.AddFirst(_current);
+            _values = new int[numberOfMarbles];
+            _next = new int[numberOfMarbles];
+            _previous = new int[numberOfMarbles];
+
+            _values[0] = 0;
+            _current = 0;
+            _nextSlot = 1;
         }
 
         public void AddMarble(int marble)
         {
-            var insertAfter = _current.Next;
-            if (insertAfter == null)
-                insertAfter = _marbles.Find(_marbles.First());
+            _values[_nextSlot] = marble;
 
-            var newNode = new LinkedListNode<int>(marble);
-            _marbles.AddAfter(insertAfter, newNode);
+            var indexOfPlusOne = _next[_current];
+            var indexOfPlusTwo = _next[indexOfPlusOne];
 
-            _current = newNode;
+            _next[indexOfPlusOne] = _nextSlot;
+            _previous[_nextSlot] = indexOfPlusOne;
+
+            _next[_nextSlot] = indexOfPlusTwo;
+            _previous[indexOfPlusTwo] = _nextSlot;
+
+            _current = _nextSlot;
+            _nextSlot++;
         }
 
         public override string ToString()
         {
-            var sArray = new int[_marbles.Count];
-            _marbles.CopyTo(sArray, 0);
+            var answer = "(" + _values[_current] + ")";
+            var index = _next[_current];
 
-            var display = "";
-            for (int i = 0; i < _marbles.Count; i++)
+            while (index != _current)
             {
-                var value = sArray[i];
-                if (value == _current.Value)
-                    display += $"({value}) ";
-                else
-                    display += value + " ";
+                answer += " " + _values[index];
+                index = _next[index];
             }
-            return display;
+
+            return answer;
+
         }
 
         internal int RemoveMarbles(int marble)
         {
-            var score = marble;
+            for (int i = 0; i < 6; i++)
+                _current = _previous[_current];
 
-            var toRemove = _current;
-            for (int i = 0; i < 7; i++)
-            {
-                toRemove = toRemove.Previous;
-                if (toRemove == null)
-                {
-                    toRemove = _marbles.Find(_marbles.Last());
-                }
-            }
+            var sevenBack = _previous[_current];
 
-            var removing = toRemove.Value;
-            score += removing;
+            _next[_previous[sevenBack]] = _next[sevenBack];
+            _previous[_next[sevenBack]] = _previous[sevenBack];
 
-            _current = toRemove.Next;
-            if (_current == null)
-                _current = _marbles.Find(_marbles.First());
-
-            _marbles.Remove(toRemove);
-
-            return score;
+            return marble + _values[sevenBack];
         }
 
     }
