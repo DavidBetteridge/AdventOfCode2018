@@ -16,6 +16,12 @@ main = do
     let (_, n) = buildNode (contents ++ " ")
     let answer = sumMetaData n
     putStr $ show answer  
+    putStr "\n"
+
+    let answer2 = part2 n
+    putStr $ show answer2  
+    putStr "\n"
+
     hClose handle  
 
 data Node = Node { numberOfChildNodes :: Int, 
@@ -65,6 +71,17 @@ sumMetaDataNodes (x:xs) = sumMetaData x + sumMetaDataNodes xs
 
 sumMetaData :: Node -> Int
 sumMetaData node = sum(metaData node) + sumMetaDataNodes (childNodes node)
+
+part2 :: Node -> Int
+part2 node = if (numberOfChildNodes node == 0) then
+                sum(metaData node)
+             else
+                result
+        where 
+            suitableNodes = filter (\childNumber -> childNumber > 0 && childNumber <= numberOfChildNodes node) (metaData node)      
+            nodesToSum = map (\childNumber -> (childNodes node)!!(childNumber-1)) suitableNodes     
+            nodeTotals = map (part2) nodesToSum   
+            result = sum(nodeTotals)    
 
 test = print ( (show $ amountOfMetaData n )  ++ " " ++ show m1 ++ " " ++ show m2 ++ " " ++ show m3)
     where (newText, n) = buildNode "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2"
