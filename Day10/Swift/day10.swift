@@ -12,6 +12,29 @@ struct Position {
     let Y: Int
 }
 
+struct Matrix<T> {
+    let rows: Int, columns: Int
+    var grid: [T]
+    init(rows: Int, columns: Int,defaultValue: T) {
+        self.rows = rows
+        self.columns = columns
+        grid = Array(repeating: defaultValue, count: rows * columns) as! [T]
+    }
+    func indexIsValid(row: Int, column: Int) -> Bool {
+        return row >= 0 && row < rows && column >= 0 && column < columns
+    }
+    subscript(row: Int, column: Int) -> T {
+        get {
+            assert(indexIsValid(row: row, column: column), "Index out of range")
+            return grid[(row * columns) + column]
+        }
+        set {
+            assert(indexIsValid(row: row, column: column), "Index out of range")
+            grid[(row * columns) + column] = newValue
+        }
+    }
+}
+
 extension String {
     var lines: [String] {
         return split { String($0).rangeOfCharacter(from: .newlines) != nil }.map(String.init)
@@ -380,23 +403,39 @@ func drawStarField(stars: [Position], seconds: Int)
 {
     var minX = stars.min { a, b in a.X < b.X}!.X;
     var minY = stars.min { a, b in a.Y < b.Y}!.Y;
-    var maxX = stars.max { a, b in a.X > b.X}!.X;
-    var maxY = stars.max { a, b in a.Y > b.Y}!.Y;
-print("Here1")
-    var starField = Array(repeating: Array(repeating: false, count: 1 + maxY - minY), count: 1 + maxX - minX)
+    var maxX = stars.max { a, b in a.X < b.X}!.X;
+    var maxY = stars.max { a, b in a.Y < b.Y}!.Y;
 
-print("Here")
+    var starField:Matrix<Bool> = Matrix(rows: 1 + maxX - minX,columns: 1 + maxY - minY, defaultValue:false)
     for star in stars {
-        starField[star.X - minX][star.Y - minY] = true;
+        starField[star.X - minX,star.Y - minY] = true
     }
 
+    print ("Seconds :", seconds)
+
+    for y in 0..<1 + maxY - minY
+    {
+        var line = ""
+        for x in 0..<1 + maxX - minX
+        {
+            if (starField[x,y])
+            {
+                line = line + "X"
+            }
+            else
+            {
+                line = line + " "
+            }
+        }
+        print(line)
+    }
   }
 
 
 var text = inputText()
 var stars = text.lines.map {createStar(line: $0)}
 var seconds = calculateNumberOfSeconds(stars: stars)
-var positions = starsAtTime(stars: stars, seconds: seconds)
+var positions = starsAtTime(stars: stars, seconds: seconds-2)
 drawStarField(stars: positions, seconds: seconds)
 
 
