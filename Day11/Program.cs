@@ -181,19 +181,6 @@
             return $"{topLeftX},{topLeftY},{bestRegionSize},{bestTotal}";
         }
 
-        private static int CalculateRegion(int[,] powerLevels, int x, int y, int regionSize)
-        {
-            var total = 0;
-            for (int c = x; c < x + regionSize; c++)
-            {
-                for (int r = y; r < y + regionSize; r++)
-                {
-                    total += powerLevels[c, r];
-                }
-            }
-            return total;
-        }
-
         private static int CalculatePowerLevel(int x, int y, int grid_serial_number)
         {
             var rackID = x + 10;
