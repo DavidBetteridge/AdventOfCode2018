@@ -43,14 +43,10 @@ def part_one()
   puts topLeftY+1
 end
 
-class Marray < Array
-  def [](i)
-    super.nil? ? self[i] = Marray.new : super
-  end
-end
-
 def part_two()
-  powerLevels = Marray.new
+  powerLevels = Array.new(300) { Array.new(300) }
+  powerLevels.unshift([0] * (300 + 1))
+
   powerLevels[1][1] = calculate_power_level 1, 1
 
   (1..300).each do |x|
