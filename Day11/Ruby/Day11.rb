@@ -16,27 +16,98 @@ def build_column(x)
   return (1..300).map { |y| calculate_power_level x, y }
 end
 
-powerLevels = (1..300).map { |x| build_column x }
 
-bestTotal = -999999;
-topLeftX = 0;
-topLeftY = 0;
+def part_one()
+  powerLevels = (1..300).map { |x| build_column x }
 
-(1..297).each do |x|
-  (1..297).each do |y|
-        regionTotal = powerLevels[x][y] + powerLevels[x + 1][y] + powerLevels[x + 2][y] +
-                      powerLevels[x][y + 1] + powerLevels[x + 1][y + 1] + powerLevels[x + 2][y + 1] +
-                      powerLevels[x][y + 2] + powerLevels[x + 1][y + 2] + powerLevels[x + 2][y + 2]  
+  bestTotal = -999999;
+  topLeftX = 0;
+  topLeftY = 0;
 
-        if (regionTotal > bestTotal)
-            bestTotal = regionTotal
-            topLeftX = x
-            topLeftY = y
-        end
+  (1..297).each do |x|
+    (1..297).each do |y|
+          regionTotal = powerLevels[x][y] + powerLevels[x + 1][y] + powerLevels[x + 2][y] +
+                        powerLevels[x][y + 1] + powerLevels[x + 1][y + 1] + powerLevels[x + 2][y + 1] +
+                        powerLevels[x][y + 2] + powerLevels[x + 1][y + 2] + powerLevels[x + 2][y + 2]  
 
+          if (regionTotal > bestTotal)
+              bestTotal = regionTotal
+              topLeftX = x
+              topLeftY = y
+          end
+
+    end
+  end
+
+  puts topLeftX+1
+  puts topLeftY+1
+end
+
+class Marray < Array
+  def [](i)
+    super.nil? ? self[i] = Marray.new : super
   end
 end
 
+def part_two()
+  powerLevels = Marray.new
+  powerLevels[1][1] = calculate_power_level 1, 1
 
-puts topLeftX+1
-puts topLeftY+1
+  (1..300).each do |x|
+    (1..300).each do |y|
+
+      total = 0
+
+      if (x > 1 || y > 1)
+        total = calculate_power_level x, y
+      end
+
+      if (x > 1)
+        total = total + powerLevels[x - 1][y]
+      end
+
+      if (y > 1)
+        total = total + powerLevels[x][y - 1]
+      end
+
+      if (y > 1) && (x > 1)
+        total = total - powerLevels[x - 1][y - 1]
+      end
+
+      powerLevels[x][y] = total
+
+    end
+  end
+
+  bestRegionSize = 0
+  bestTotal = -99999
+  topLeftX = 0
+  topLeftY = 0
+
+  (1..300).each do |regionSize|
+      (1..(301 - regionSize - 1)).each do |x|
+        (1..(301 - regionSize - 1)).each do |y|
+              a = powerLevels[x][y]
+              b = powerLevels[x + regionSize][y]
+              c = powerLevels[x][y + regionSize]
+              d = powerLevels[x + regionSize][y + regionSize]
+              score = d + a - b - c
+
+              if (score > bestTotal)
+                  bestTotal = score
+                  topLeftX = x
+                  topLeftY = y
+                  bestRegionSize = regionSize
+              end
+          end
+      end
+  end
+
+  puts topLeftX+1
+  puts topLeftY+1
+  puts bestRegionSize
+  puts bestTotal
+
+end
+
+part_two
