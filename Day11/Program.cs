@@ -9,10 +9,79 @@
 
             Timer.TimeMe(() =>
             {
+                System.Console.WriteLine($"Part 2 -> {Part2_SummedArea()}");
+            });
+
+            Timer.TimeMe(() =>
+            {
                 System.Console.WriteLine($"Part 2 -> {Part2()}");
             });
 
             System.Console.ReadKey();
+        }
+
+        private static string Part2_SummedArea()
+        {
+            const int grid_serial_number = 2568;
+
+            var powerLevels = new int[301, 301];
+
+            powerLevels[1, 1] = CalculatePowerLevel(1, 1, grid_serial_number);
+            for (int x = 1; x <= 300; x++)
+            {
+                for (int y = 1; y <= 300; y++)
+                {
+                    if (x > 1 || y > 1)
+                    {
+                        powerLevels[x, y] = CalculatePowerLevel(x, y, grid_serial_number);
+                    }
+
+                    if (x > 1)
+                    {
+                        powerLevels[x, y] += powerLevels[x - 1, y];
+                    }
+
+                    if (y > 1)
+                    {
+                        powerLevels[x, y] += powerLevels[x, y - 1];
+                    }
+
+                    if (y > 1 && x > 1)
+                    {
+                        powerLevels[x, y] -= powerLevels[x - 1, y - 1];
+                    }
+                }
+            }
+
+            var bestRegionSize = 0;
+            var bestTotal = int.MinValue;
+            var topLeftX = 0;
+            var topLeftY = 0;
+
+            for (int regionSize = 1; regionSize <= 300; regionSize++)
+            {
+                for (int x = 1; x <= 301 - regionSize-1; x++)
+                {
+                    for (int y = 1; y <= 301 - regionSize-1; y++)
+                    {
+                        var A = powerLevels[x, y];
+                        var B = powerLevels[x + regionSize, y];
+                        var C = powerLevels[x, y + regionSize];
+                        var D = powerLevels[x + regionSize, y + regionSize];
+                        var score = D + A - B - C;
+
+                        if (score > bestTotal)
+                        {
+                            bestTotal = score;
+                            topLeftX = x;
+                            topLeftY = y;
+                            bestRegionSize = regionSize;
+                        }
+                    }
+                }
+            }
+
+            return $"{topLeftX+1},{topLeftY+1},{bestRegionSize},{bestTotal}";
         }
 
         private static string Part1()
@@ -50,6 +119,7 @@
             }
             return $"{topLeftX},{topLeftY}";
         }
+
         private static string Part2()
         {
             const int grid_serial_number = 2568;
@@ -81,7 +151,7 @@
                 }
             }
 
-            for (int regionSize = 1; regionSize <= 300; regionSize++)
+            for (int regionSize = 2; regionSize <= 300; regionSize++)
             {
                 for (int x = 0; x < 300 - regionSize - 1; x++)
                 {
@@ -108,8 +178,22 @@
                 }
             }
 
-            return $"{topLeftX},{topLeftY},{bestRegionSize}";
+            return $"{topLeftX},{topLeftY},{bestRegionSize},{bestTotal}";
         }
+
+        private static int CalculateRegion(int[,] powerLevels, int x, int y, int regionSize)
+        {
+            var total = 0;
+            for (int c = x; c < x + regionSize; c++)
+            {
+                for (int r = y; r < y + regionSize; r++)
+                {
+                    total += powerLevels[c, r];
+                }
+            }
+            return total;
+        }
+
         private static int CalculatePowerLevel(int x, int y, int grid_serial_number)
         {
             var rackID = x + 10;
