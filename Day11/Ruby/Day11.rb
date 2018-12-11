@@ -79,29 +79,29 @@ def part_two()
     end
   end
 
+  puts "Built powerLevels"
+
   bestRegionSize = 0
   bestTotal = -99999
   topLeftX = 0
   topLeftY = 0
 
-  (1..300).each do |regionSize|
-      (1..(301 - regionSize - 1)).each do |x|
-        (1..(301 - regionSize - 1)).each do |y|
-              a = powerLevels[x][y]
-              b = powerLevels[x + regionSize][y]
-              c = powerLevels[x][y + regionSize]
-              d = powerLevels[x + regionSize][y + regionSize]
-              score = d + a - b - c
-
+  (1..300).each { |regionSize|
+      max = 301 - regionSize - 1  
+      (1..max).each { |x|
+        ysLeft = powerLevels[x]
+        ysRight = powerLevels[x + regionSize]
+        (1..max).each { |y|
+              score = ysRight[y + regionSize] + ysLeft[y] - ysRight[y] - ysLeft[y + regionSize]
               if (score > bestTotal)
                   bestTotal = score
                   topLeftX = x
                   topLeftY = y
                   bestRegionSize = regionSize
               end
-          end
-      end
-  end
+          }
+      }
+  }
 
   puts topLeftX+1
   puts topLeftY+1
