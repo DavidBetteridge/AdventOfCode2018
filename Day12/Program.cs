@@ -2,40 +2,32 @@
 
 namespace Day12
 {
-    //#.#.. => .
-
-    class Rule
-    {
-        public char L1 { get; set; }
-        public char L2 { get; set; }
-        public char Node { get; set; }
-        public char R1 { get; set; }
-        public char R2 { get; set; }
-        public char Produces { get; set; }
-
-        public Rule(string line)
-        {
-            L2 = line[0];
-            L1 = line[1];
-            Node = line[2];
-            R1 = line[3];
-            R2 = line[4];
-            Produces = line[9];
-        }
-
-        internal bool Matches(char v1, char v2, char v3, char v4, char v5)
-        {
-            return v1 == L2 &&
-                   v2 == L1 &&
-                   v3 == Node &&
-                   v4 == R1 &&
-                   v5 == R2;
-        }
-    }
 
     class Program
     {
         static void Main(string[] args)
+        {
+            Timer.TimeMe(() =>
+            {
+                System.Console.WriteLine($"Part 1 -> {Part1()}");
+            });
+
+            Timer.TimeMe(() =>
+            {
+                System.Console.WriteLine($"Part 2 -> {Part2()}");
+            });
+
+            System.Console.ReadKey();
+        }
+
+        private static long Part2()
+        {
+            // After 185 generators the score increases from 35405 in multiples of 194
+            var generation = 50000000000 - 1;
+            return 35405 + (194 * (generation - 185));
+        }
+
+        private static long Part1()
         {
             var input = System.IO.File.ReadAllLines("Input.txt");
 
@@ -47,7 +39,8 @@ namespace Day12
                 rules[i - 2] = new Rule(input[i]);
             }
 
-            for (int generator = 0; generator < 20; generator++)
+            var numberOfGenerations = 20;
+            for (int generation = 0; generation < numberOfGenerations; generation++)
             {
                 var previousState = (char[])currentState.Clone();
 
@@ -66,37 +59,20 @@ namespace Day12
                         }
                     }
                 }
-
             }
 
+            return CalculateScore(currentState);
+        }
+
+        private static int CalculateScore(char[] currentState)
+        {
             var score = 0;
             for (int position = 0; position < currentState.Length; position++)
             {
                 if (currentState[position] == '#')
                     score += position - 20;
             }
-
-            Timer.TimeMe(() =>
-                        {
-                            System.Console.WriteLine($"Part 1 -> {Part1()}");
-                        });
-
-            //Timer.TimeMe(() =>
-            //{
-            //    System.Console.WriteLine($"Part 2 -> {Part2()}");
-            //});
-
-            System.Console.ReadKey();
-        }
-
-        private static object Part2()
-        {
-            throw new NotImplementedException();
-        }
-
-        private static object Part1()
-        {
-            throw new NotImplementedException();
+            return score;
         }
     }
 }
