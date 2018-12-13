@@ -21,10 +21,6 @@ namespace Day13
     }
     class Program
     {
-
-
-
-
         static void Main(string[] args)
         {
             var parser = new Parser();
@@ -160,10 +156,6 @@ namespace Day13
                     }
 
                 }
-
-                //137,89
-                //138,89
-
 
                 //69,67
 
