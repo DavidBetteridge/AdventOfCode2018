@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace Day13
 {
-
     enum Direction
     {
         West = 0,
@@ -24,12 +23,10 @@ namespace Day13
         static void Main(string[] args)
         {
             var parser = new Parser();
-            char[,] cells;
-            List<Cart> carts;
-            parser.Load(out cells, out carts);
+            var (cells, carts)= parser.Load();
 
             var tick = 0;
-            while (true)
+            while (carts.Count(c => !c.IsDead) > 1)
             {
             //    Display(cells, carts);
 
@@ -137,7 +134,6 @@ namespace Day13
 
                     }
 
-
                     var result = carts.Where(c => !c.IsDead).GroupBy(c => (c.X, c.Y));
                     var crashes = result.Where(grp => grp.Count() > 1).ToList();
 
@@ -154,23 +150,12 @@ namespace Day13
                             c.IsDead = true;
                         }
                     }
-
                 }
-
-                //69,67
-
-                if (carts.Count(c => !c.IsDead) == 1)
-                {
-                    var remaining = carts.Single(c => !c.IsDead);
-                    Console.WriteLine($"Part 2 :: {remaining.X},{remaining.Y}");
-                    Console.ReadKey();
-
-                }
-
             }
 
-
-            Console.WriteLine("Hello World!");
+            var remaining = carts.Single(c => !c.IsDead);
+            Console.WriteLine($"Part 2 :: {remaining.X},{remaining.Y}");  //69,67
+            Console.ReadKey();
         }
 
 
@@ -214,8 +199,6 @@ namespace Day13
                 Console.WriteLine();
             }
             Console.ReadKey();
-            //Console.WriteLine();
-            //Console.WriteLine();
         }
 
         private static char NextTrack(int x, int y, Direction currentDirection, char[,] cells)
