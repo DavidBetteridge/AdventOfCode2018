@@ -19,140 +19,27 @@ namespace Day13
         Straight = 1,
         Right = 2,
     }
-
-    class Cart
-    {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public Direction CurrentDirection { get; set; }
-        public Turn NextTurn { get; set; }
-
-        public void Turn()
-        {
-            switch (NextTurn)
-            {
-                case Day13.Turn.Left:
-                    NextTurn = Day13.Turn.Straight;
-                    switch (CurrentDirection)
-                    {
-                        case Direction.West:
-                            CurrentDirection = Direction.South;
-                            break;
-                        case Direction.North:
-                            CurrentDirection = Direction.West;
-                            break;
-                        case Direction.East:
-                            CurrentDirection = Direction.North;
-                            break;
-                        case Direction.South:
-                            CurrentDirection = Direction.East;
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-
-                case Day13.Turn.Straight:
-                    NextTurn = Day13.Turn.Right;
-                    break;
-
-                case Day13.Turn.Right:
-                    NextTurn = Day13.Turn.Left;
-                    switch (CurrentDirection)
-                    {
-                        case Direction.West:
-                            CurrentDirection = Direction.North;
-                            break;
-                        case Direction.North:
-                            CurrentDirection = Direction.East;
-                            break;
-                        case Direction.East:
-                            CurrentDirection = Direction.South;
-                            break;
-                        case Direction.South:
-                            CurrentDirection = Direction.West;
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-
-                default:
-                    throw new Exception("Unknown turn");
-            }
-        }
-    }
     class Program
     {
 
-        public static char[,] Convert(char[][] matrix)
-        {
-            int w = matrix.Count();
-            int h = matrix[0].Length;
 
-            var result = new char[h, w];
 
-            for (int i = 0; i < w; i++)
-            {
-                for (int j = 0; j < h; j++)
-                {
-                    result[j, i] = matrix[i][j];
-                }
-            }
-
-            return result;
-        }
 
         static void Main(string[] args)
         {
-            //var rows = System.IO.File.ReadAllLines("Input.txt");
-            var file = System.IO.File.ReadAllLines("Input.txt").Select(line => line.ToCharArray()).ToArray();
-            var cells = Convert(file);
-
-
-            var carts = new List<Cart>();
-
-
-            for (int y = 0; y < cells.GetUpperBound(1); y++)
-            {
-                for (int x = 0; x < cells.GetUpperBound(0); x++)
-                {
-
-                    switch (cells[x, y])
-                    {
-                        case '<':
-                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.West, NextTurn = Turn.Left });
-                            cells[x, y] = '-';
-                            break;
-
-                        case '>':
-                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.East, NextTurn = Turn.Left });
-                            cells[x, y] = '-';
-                            break;
-
-                        case '^':
-                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.North, NextTurn = Turn.Left });
-                            cells[x, y] = '|';
-                            break;
-
-                        case 'v':
-                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.South, NextTurn = Turn.Left });
-                            cells[x, y] = '|';
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-            }
-            Display(cells, carts);
+            var parser = new Parser();
+            char[,] cells;
+            List<Cart> carts;
+            parser.Load(out cells, out carts);
 
             var tick = 0;
             while (true)
             {
+            //    Display(cells, carts);
+
                 tick++;
                 var orderedCarts = carts.OrderBy(cart => cart.Y).ThenBy(cart => cart.X);
-                foreach (var cart in orderedCarts)
+                foreach (var cart in orderedCarts.Where(c => !c.IsDead))
                 {
                     var nextTrack = NextTrack(cart.X, cart.Y, cart.CurrentDirection, cells);
                     switch (nextTrack)
@@ -225,22 +112,22 @@ namespace Day13
                             switch (cart.CurrentDirection)
                             {
                                 case Direction.West:
-                                    cart.Turn();
+                                    cart.TurnCart();
                                     cart.X = cart.X - 1;
                                     break;
 
                                 case Direction.North:
-                                    cart.Turn();
+                                    cart.TurnCart();
                                     cart.Y = cart.Y - 1;
                                     break;
 
                                 case Direction.East:
-                                    cart.Turn();
+                                    cart.TurnCart();
                                     cart.X = cart.X + 1;
                                     break;
 
                                 case Direction.South:
-                                    cart.Turn();
+                                    cart.TurnCart();
                                     cart.Y = cart.Y + 1;
                                     break;
 
@@ -253,30 +140,57 @@ namespace Day13
                             throw new Exception("Unknown track type");
 
                     }
+
+
+                    var result = carts.Where(c => !c.IsDead).GroupBy(c => (c.X, c.Y));
+                    var crashes = result.Where(grp => grp.Count() > 1).ToList();
+
+                    if (crashes.Any())
+                    {
+                        Console.WriteLine($"Part 1 :: {crashes.First().First().X},{crashes.First().First().Y}");
+                        //   Console.ReadKey();
+                    }
+
+                    foreach (var crash in crashes)
+                    {
+                        foreach (var c in crash)
+                        {
+                            c.IsDead = true;
+                        }
+                    }
+
                 }
 
-                var result = carts.GroupBy(cart => (cart.X, cart.Y));
-                var same = result.Where(grp => grp.Count() > 1).FirstOrDefault();
-                if (same != null)
+                //137,89
+                //138,89
+
+
+                //69,67
+
+                if (carts.Count(c => !c.IsDead) == 1)
                 {
-                    Console.WriteLine($"{same.First().X},{same.First().Y}");
+                    var remaining = carts.Single(c => !c.IsDead);
+                    Console.WriteLine($"Part 2 :: {remaining.X},{remaining.Y}");
                     Console.ReadKey();
+
                 }
 
-           //     Display(cells, carts);
             }
 
 
             Console.WriteLine("Hello World!");
         }
 
-        static void Display(char[,] cells, IEnumerable<Cart> carts)
+
+       static void Display(char[,] cells, IEnumerable<Cart> carts)
         {
+            Console.Clear();
+            Console.SetCursorPosition(0, 0);
             for (int y = 0; y <= cells.GetUpperBound(1); y++)
             {
                 for (int x = 0; x <= cells.GetUpperBound(0); x++)
                 {
-                    var cart = carts.FirstOrDefault(c => c.X == x && c.Y == y);
+                    var cart = carts.FirstOrDefault(c => c.X == x && c.Y == y && !c.IsDead);
                     if (cart == null)
                     {
                         Console.Write(cells[x, y]);
@@ -307,6 +221,9 @@ namespace Day13
                 }
                 Console.WriteLine();
             }
+            Console.ReadKey();
+            //Console.WriteLine();
+            //Console.WriteLine();
         }
 
         private static char NextTrack(int x, int y, Direction currentDirection, char[,] cells)
