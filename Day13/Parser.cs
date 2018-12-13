@@ -18,22 +18,22 @@ namespace Day13
                     switch (cells[x, y])
                     {
                         case '<':
-                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.West, NextTurn = Turn.Left });
+                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.West, NextTurn = Turn.Left, IsAlive=true });
                             cells[x, y] = '-';
                             break;
 
                         case '>':
-                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.East, NextTurn = Turn.Left });
+                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.East, NextTurn = Turn.Left, IsAlive = true });
                             cells[x, y] = '-';
                             break;
 
                         case '^':
-                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.North, NextTurn = Turn.Left });
+                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.North, NextTurn = Turn.Left, IsAlive = true });
                             cells[x, y] = '|';
                             break;
 
                         case 'v':
-                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.South, NextTurn = Turn.Left });
+                            carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.South, NextTurn = Turn.Left, IsAlive = true });
                             cells[x, y] = '|';
                             break;
 

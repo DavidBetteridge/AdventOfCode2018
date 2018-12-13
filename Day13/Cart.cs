@@ -8,7 +8,7 @@ namespace Day13
         public int Y { get; set; }
         public Direction CurrentDirection { get; set; }
         public Turn NextTurn { get; set; }
-        public bool IsDead { get; set; }
+        public bool IsAlive { get; set; }
 
         private Turn WorkOutNextTurn(Turn turn)
         {

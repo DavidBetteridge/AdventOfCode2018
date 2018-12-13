@@ -26,13 +26,13 @@ namespace Day13
             var (cells, carts)= parser.Load();
 
             var tick = 0;
-            while (carts.Count(c => !c.IsDead) > 1)
+            while (carts.Count(c => c.IsAlive) > 1)
             {
             //    Display(cells, carts);
 
                 tick++;
                 var orderedCarts = carts.OrderBy(cart => cart.Y).ThenBy(cart => cart.X);
-                foreach (var cart in orderedCarts.Where(c => !c.IsDead))
+                foreach (var cart in orderedCarts.Where(c => c.IsAlive))
                 {
                     var nextTrack = NextTrack(cart.X, cart.Y, cart.CurrentDirection, cells);
                     switch (nextTrack)
@@ -105,28 +105,26 @@ namespace Day13
                             switch (cart.CurrentDirection)
                             {
                                 case Direction.West:
-                                    cart.TurnCart();
                                     cart.X = cart.X - 1;
                                     break;
 
                                 case Direction.North:
-                                    cart.TurnCart();
                                     cart.Y = cart.Y - 1;
                                     break;
 
                                 case Direction.East:
-                                    cart.TurnCart();
                                     cart.X = cart.X + 1;
                                     break;
 
                                 case Direction.South:
-                                    cart.TurnCart();
                                     cart.Y = cart.Y + 1;
                                     break;
 
                                 default:
                                     throw new Exception("Unknown direction");
                             }
+
+                            cart.TurnCart();
                             break;
 
                         default:
@@ -134,7 +132,7 @@ namespace Day13
 
                     }
 
-                    var result = carts.Where(c => !c.IsDead).GroupBy(c => (c.X, c.Y));
+                    var result = carts.Where(c => c.IsAlive).GroupBy(c => (c.X, c.Y));
                     var crashes = result.Where(grp => grp.Count() > 1).ToList();
 
                     if (crashes.Any())
@@ -147,13 +145,13 @@ namespace Day13
                     {
                         foreach (var c in crash)
                         {
-                            c.IsDead = true;
+                            c.IsAlive = false;
                         }
                     }
                 }
             }
 
-            var remaining = carts.Single(c => !c.IsDead);
+            var remaining = carts.Single(c => c.IsAlive);
             Console.WriteLine($"Part 2 :: {remaining.X},{remaining.Y}");  //69,67
             Console.ReadKey();
         }
@@ -167,7 +165,7 @@ namespace Day13
             {
                 for (int x = 0; x <= cells.GetUpperBound(0); x++)
                 {
-                    var cart = carts.FirstOrDefault(c => c.X == x && c.Y == y && !c.IsDead);
+                    var cart = carts.FirstOrDefault(c => c.X == x && c.Y == y && c.IsAlive);
                     if (cart == null)
                     {
                         Console.Write(cells[x, y]);
