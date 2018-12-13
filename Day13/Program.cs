@@ -84,52 +84,77 @@ namespace Day13
     }
     class Program
     {
+
+        public static char[,] Convert(char[][] matrix)
+        {
+            int w = matrix.Count();
+            int h = matrix[0].Length;
+
+            var result = new char[h, w];
+
+            for (int i = 0; i < w; i++)
+            {
+                for (int j = 0; j < h; j++)
+                {
+                    result[j, i] = matrix[i][j];
+                }
+            }
+
+            return result;
+        }
+
         static void Main(string[] args)
         {
-            var rows = System.IO.File.ReadAllLines("Input.txt");
+            //var rows = System.IO.File.ReadAllLines("Input.txt");
+            var file = System.IO.File.ReadAllLines("Input.txt").Select(line => line.ToCharArray()).ToArray();
+            var cells = Convert(file);
+
+
             var carts = new List<Cart>();
 
-            for (int y = 0; y < rows.Length; y++)
+
+            for (int y = 0; y < cells.GetUpperBound(1); y++)
             {
-                var cells = rows[y].ToCharArray();
-                for (int x = 0; x < cells.Length; x++)
+                for (int x = 0; x < cells.GetUpperBound(0); x++)
                 {
 
-                    switch (cells[x])
+                    switch (cells[x, y])
                     {
                         case '<':
                             carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.West, NextTurn = Turn.Left });
-                            cells[x] = '-';
+                            cells[x, y] = '-';
                             break;
 
                         case '>':
                             carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.East, NextTurn = Turn.Left });
-                            cells[x] = '-';
+                            cells[x, y] = '-';
                             break;
 
                         case '^':
                             carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.North, NextTurn = Turn.Left });
-                            cells[x] = '|';
+                            cells[x, y] = '|';
                             break;
 
                         case 'v':
                             carts.Add(new Cart() { X = x, Y = y, CurrentDirection = Direction.South, NextTurn = Turn.Left });
-                            cells[x] = '|';
+                            cells[x, y] = '|';
                             break;
 
                         default:
                             break;
                     }
                 }
-                rows[y] = new string(cells);
             }
+            Display(cells, carts);
 
+            var tick = 0;
             while (true)
             {
+                tick++;
                 var orderedCarts = carts.OrderBy(cart => cart.Y).ThenBy(cart => cart.X);
                 foreach (var cart in orderedCarts)
                 {
-                    var nextTrack = NextTrack(cart.X, cart.Y, cart.CurrentDirection, rows);
+                    var nextTrack = NextTrack(cart.X, cart.Y, cart.CurrentDirection, cells);
                     switch (nextTrack)
                     {
                         case '|':
@@ -149,7 +174,7 @@ namespace Day13
                                     break;
 
                                 case Direction.North:
-                                    cart.CurrentDirection = Direction.West;
+                                    cart.CurrentDirection = Direction.East;
                                     cart.Y = cart.Y - 1;
                                     break;
 
@@ -159,7 +184,7 @@ namespace Day13
                                     break;
 
                                 case Direction.South:
-                                    cart.CurrentDirection = Direction.East;
+                                    cart.CurrentDirection = Direction.West;
                                     cart.Y = cart.Y + 1;
                                     break;
 
@@ -177,7 +202,7 @@ namespace Day13
                                     break;
 
                                 case Direction.North:
-                                    cart.CurrentDirection = Direction.East;
+                                    cart.CurrentDirection = Direction.West;
                                     cart.Y = cart.Y - 1;
                                     break;
 
@@ -187,7 +212,7 @@ namespace Day13
                                     break;
 
                                 case Direction.South:
-                                    cart.CurrentDirection = Direction.West;
+                                    cart.CurrentDirection = Direction.East;
                                     cart.Y = cart.Y + 1;
                                     break;
 
@@ -236,29 +261,66 @@ namespace Day13
                 {
                     Console.WriteLine($"{same.First().X},{same.First().Y}");
                     Console.ReadKey();
-                }                    
+                }
 
-
+           //     Display(cells, carts);
             }
 
 
             Console.WriteLine("Hello World!");
         }
 
+        static void Display(char[,] cells, IEnumerable<Cart> carts)
+        {
+            for (int y = 0; y <= cells.GetUpperBound(1); y++)
+            {
+                for (int x = 0; x <= cells.GetUpperBound(0); x++)
+                {
+                    var cart = carts.FirstOrDefault(c => c.X == x && c.Y == y);
+                    if (cart == null)
+                    {
+                        Console.Write(cells[x, y]);
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGreen;
+                        switch (cart.CurrentDirection)
+                        {
+                            case Direction.West:
+                                Console.Write("<");
+                                break;
+                            case Direction.North:
+                                Console.Write("^");
+                                break;
+                            case Direction.East:
+                                Console.Write(">");
+                                break;
+                            case Direction.South:
+                                Console.Write("v");
+                                break;
+                            default:
+                                break;
+                        }
+                        Console.ResetColor();
+                    }
 
+                }
+                Console.WriteLine();
+            }
+        }
 
-        private static char NextTrack(int x, int y, Direction currentDirection, string[] rows)
+        private static char NextTrack(int x, int y, Direction currentDirection, char[,] cells)
         {
             switch (currentDirection)
             {
                 case Direction.West:
-                    return rows[y][x - 1];
+                    return cells[x - 1, y];
                 case Direction.North:
-                    return rows[y - 1][x];
+                    return cells[x, y - 1];
                 case Direction.East:
-                    return rows[y][x + 1];
+                    return cells[x + 1, y];
                 case Direction.South:
-                    return rows[y + 1][x];
+                    return cells[x, y + 1];
                 default:
                     throw new Exception("Unknown direction");
             }
