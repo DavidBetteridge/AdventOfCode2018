@@ -7,31 +7,37 @@ namespace Day14
     {
         static void Main(string[] args)
         {
-            Lookfor("51589");
-            Lookfor("01245");
-            Lookfor("92510");
-            Lookfor("59414");
-         //  Lookfor("157901");
-
             WorkoutScores(9);
             WorkoutScores(5);
             WorkoutScores(18);
             WorkoutScores(2018);
             WorkoutScores(157901);  //9 4 1 1 1 3 7 1 3 3
+
+            Lookfor("51589");
+            Lookfor("01245");
+            Lookfor("92510");
+            Lookfor("59414");
+            Lookfor("157901");
+
+            System.Console.ReadKey();
         }
 
         private static void Lookfor(string lookfor)
         {
-            var compareWith = lookfor.ToCharArray().Select(a => int.Parse(a.ToString())).ToArray();
+            var compareWith = lookfor.ToCharArray().Select(a => byte.Parse(a.ToString())).ToArray();
 
             var elf1 = 0;
             var elf2 = 1;
 
-            var receipes = new List<int>();
-            receipes.Add(3);
-            receipes.Add(7);
+            var receipes = new List<byte>(int.MaxValue / 10)
+            {
+                3,
+                7
+            };
 
-            while (!EndWith(receipes, compareWith))
+            var receipesText = "37".PadLeft(lookfor.Length,'0');
+
+            while (true)
             {
                 var nextReceipe = receipes[elf1] + receipes[elf2];
 
@@ -39,22 +45,44 @@ namespace Day14
                 {
                     var first = nextReceipe / 10;
                     var second = nextReceipe % 10;
-                    receipes.Add(first);
-                    receipes.Add(second);
+
+                    receipes.Add((byte)first);
+                    receipesText = receipesText.Substring(1) + first.ToString();
+
+                    if (receipesText == lookfor)
+                    {
+                        System.Console.WriteLine($"{receipes.Count-lookfor.Length}");
+                        return;
+                    }
+
+                    receipes.Add((byte)second);
+                    receipesText = receipesText.Substring(1) + second.ToString();
+
+                    if (receipesText == lookfor)
+                    {
+                        System.Console.WriteLine($"{receipes.Count - lookfor.Length}");
+                        return;
+                    }
                 }
                 else
                 {
-                    receipes.Add(nextReceipe);
+                    receipes.Add((byte)nextReceipe);
+
+                    receipesText = receipesText.Substring(1) + nextReceipe.ToString();
+
+                    if (receipesText == lookfor)
+                    {
+                        System.Console.WriteLine($"{receipes.Count - lookfor.Length}");
+                        return; 
+                    }
                 }
 
                 elf1 = (elf1 + receipes[elf1] + 1) % receipes.Count;
                 elf2 = (elf2 + receipes[elf2] + 1) % receipes.Count;
             }
-
-            System.Console.WriteLine($"{lookfor} first appears after {receipes.Count() - lookfor.Length} receipes");
         }
 
-        private static bool EndWith(List<int> receipes, int[] compareWith)
+        private static bool EndWith(List<byte> receipes, byte[] compareWith)
         {
             if (receipes.Count() < compareWith.Length) return false;
             for (int i = 1; i <= compareWith.Length; i++)
