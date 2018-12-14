@@ -7,127 +7,93 @@ namespace Day14
     {
         static void Main(string[] args)
         {
-            WorkoutScores(9);
-            WorkoutScores(5);
-            WorkoutScores(18);
-            WorkoutScores(2018);
-            WorkoutScores(157901);  //9 4 1 1 1 3 7 1 3 3
+            Part1(9);
+            Part1(5);
+            Part1(18);
+            Part1(2018);
+            Part1(157901);  //9 4 1 1 1 3 7 1 3 3
 
-            Lookfor("51589");
-            Lookfor("01245");
-            Lookfor("92510");
-            Lookfor("59414");
-            Lookfor("157901");
+            Part2("51589");
+            Part2("01245");
+            Part2("92510");
+            Part2("59414");
+            Part2("157901");
 
             System.Console.ReadKey();
         }
 
-        private static void Lookfor(string lookfor)
+        private static void Part2(string lookfor)
         {
-            var compareWith = lookfor.ToCharArray().Select(a => byte.Parse(a.ToString())).ToArray();
-
             var elf1 = 0;
             var elf2 = 1;
 
-            var receipes = new List<byte>(int.MaxValue / 10)
+            var recipes = new List<int>();
+            recipes.Add(3);
+            recipes.Add(7);
+
+            var recipesText = "37".PadLeft(lookfor.Length,'0');
+
+            while (recipesText != lookfor)
             {
-                3,
-                7
-            };
+                var nextrecipe = recipes[elf1] + recipes[elf2];
 
-            var receipesText = "37".PadLeft(lookfor.Length,'0');
-
-            while (true)
-            {
-                var nextReceipe = receipes[elf1] + receipes[elf2];
-
-                if (nextReceipe > 9)
+                if (nextrecipe > 9)
                 {
-                    var first = nextReceipe / 10;
-                    var second = nextReceipe % 10;
+                    var first = nextrecipe / 10;
+                    var second = nextrecipe % 10;
 
-                    receipes.Add((byte)first);
-                    receipesText = receipesText.Substring(1) + first.ToString();
+                    recipes.Add((byte)first);
+                    recipesText = recipesText.Substring(1) + first.ToString();
 
-                    if (receipesText == lookfor)
+                    if (recipesText != lookfor)
                     {
-                        System.Console.WriteLine($"{receipes.Count-lookfor.Length}");
-                        return;
-                    }
-
-                    receipes.Add((byte)second);
-                    receipesText = receipesText.Substring(1) + second.ToString();
-
-                    if (receipesText == lookfor)
-                    {
-                        System.Console.WriteLine($"{receipes.Count - lookfor.Length}");
-                        return;
+                        recipes.Add((byte)second);
+                        recipesText = recipesText.Substring(1) + second.ToString();
                     }
                 }
                 else
                 {
-                    receipes.Add((byte)nextReceipe);
-
-                    receipesText = receipesText.Substring(1) + nextReceipe.ToString();
-
-                    if (receipesText == lookfor)
-                    {
-                        System.Console.WriteLine($"{receipes.Count - lookfor.Length}");
-                        return; 
-                    }
+                    recipes.Add((byte)nextrecipe);
+                    recipesText = recipesText.Substring(1) + nextrecipe.ToString();
                 }
 
-                elf1 = (elf1 + receipes[elf1] + 1) % receipes.Count;
-                elf2 = (elf2 + receipes[elf2] + 1) % receipes.Count;
+                elf1 = (elf1 + recipes[elf1] + 1) % recipes.Count;
+                elf2 = (elf2 + recipes[elf2] + 1) % recipes.Count;
             }
+
+            System.Console.WriteLine($"{recipes.Count - lookfor.Length}");
         }
 
-        private static bool EndWith(List<byte> receipes, byte[] compareWith)
+        private static void Part1(int after)
         {
-            if (receipes.Count() < compareWith.Length) return false;
-            for (int i = 1; i <= compareWith.Length; i++)
-                if (compareWith[compareWith.Length - i] != receipes[receipes.Count() - i]) return false;
-
-            return true;
-        }
-
-        private static void WorkoutScores(int after)
-        {
-
             var elf1 = 0;
             var elf2 = 1;
 
-            var receipes = new List<int>();
-            receipes.Add(3);
-            receipes.Add(7);
+            var recipes = new List<int>();
+            recipes.Add(3);
+            recipes.Add(7);
 
-            while (receipes.Count < 10 + after)
+            while (recipes.Count < 10 + after)
             {
-                var nextReceipe = receipes[elf1] + receipes[elf2];
+                var nextrecipe = recipes[elf1] + recipes[elf2];
 
-                if (nextReceipe > 9)
+                if (nextrecipe > 9)
                 {
-                    var first = nextReceipe / 10;
-                    var second = nextReceipe % 10;
-                    receipes.Add(first);
-                    receipes.Add(second);
+                    var first = nextrecipe / 10;
+                    var second = nextrecipe % 10;
+                    recipes.Add(first);
+                    recipes.Add(second);
                 }
                 else
                 {
-                    receipes.Add(nextReceipe);
+                    recipes.Add(nextrecipe);
                 }
 
-                elf1 = (elf1 + receipes[elf1] + 1) % receipes.Count;
-                elf2 = (elf2 + receipes[elf2] + 1) % receipes.Count;
-
-
+                elf1 = (elf1 + recipes[elf1] + 1) % recipes.Count;
+                elf2 = (elf2 + recipes[elf2] + 1) % recipes.Count;
             }
 
-            System.Console.WriteLine($"After {after} they have {string.Join("", receipes.Skip(after).Take(10))}");
+            System.Console.WriteLine($"After {after} they have {string.Join("", recipes.Skip(after).Take(10))}");
         }
-
-
-
-
     }
 }
