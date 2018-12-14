@@ -59,6 +59,7 @@ namespace Day12
                         }
                     }
                 }
+
             }
 
             return CalculateScore(currentState);
