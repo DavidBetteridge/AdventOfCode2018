@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Day15
@@ -7,19 +8,98 @@ namespace Day15
     {
         static void Main(string[] args)
         {
-            var board = Transpose(System.IO.File.ReadLines("Sample.txt").Select(a => a.ToCharArray()).ToArray());
+            var board = Transpose(System.IO.File.ReadLines("Sample2.txt").Select(a => a.ToCharArray()).ToArray());
             Display(board);
+
+            var startX = 2;
+            var startY = 1;
 
             var inRange = InRange(board);
             Display(inRange);
 
-            var reachable = Reachable(inRange, 1, 1);
+            var reachable = Reachable(inRange, startX, startY);
             Display(reachable);
 
-            var distances = Distances(board, 1, 1);
+            var distances = Distances(board, startX, startY);
             Display(distances);
 
+            var nearest = Nearest(reachable, distances);
+            Display(nearest);
+
+            var chosen = Choose(nearest, startX, startY);
+            var withChosen = (char[,])board.Clone();
+            withChosen[chosen.x, chosen.y] = '+';
+            Display(withChosen);
+
+            var shortestPath = Distances(board, chosen.x, chosen.y);
+            Display(shortestPath);
+
+            var step = FindStep(shortestPath, startX, startY);
+            var withStep = (char[,])board.Clone();
+            withStep[startX, startY] = '.';
+            withStep[step.X, step.Y] = 'E';
+            Display(withStep);
+
             System.Console.ReadKey();
+        }
+
+        private static (int X, int Y) FindStep(int[,] shortestPath, int x, int y)
+        {
+            var lowests = new List<(int x, int y)>();
+
+            var left = (x > 0) ? shortestPath[x - 1, y] : int.MaxValue;
+            var up = (y > 0) ? shortestPath[x, y - 1] : int.MaxValue;
+            var right = (x < shortestPath.GetUpperBound(0)) ? shortestPath[x + 1, y] : int.MaxValue;
+            var down = (y < shortestPath.GetUpperBound(1)) ? shortestPath[x, y + 1] : int.MaxValue;
+            var lowest = Math.Min(Math.Min(Math.Min(left, up), right), down);
+
+            if (up == lowest) return (x, y - 1);
+            if (left == lowest) return (x - 1, y);
+            if (right == lowest) return (x + 1, y);
+            if (down == lowest) return (x, y + 1);
+
+            throw new Exception("no lowest");
+        }
+
+        private static (int x, int y) Choose(char[,] board, int startX, int startY)
+        {
+            for (int y = 0; y < board.GetUpperBound(1); y++)
+                for (int x = 0; x < board.GetUpperBound(0); x++)
+                    if (board[x, y] == '!') return (x, y);
+
+            throw new System.Exception("Not found");
+        }
+
+        private static char[,] Nearest(char[,] board, int[,] distances)
+        {
+            // Find the @s with the lowest score in distances.
+            var lowestScore = int.MaxValue;
+            var lowests = new List<(int x, int y)>();
+            for (int y = 0; y < board.GetUpperBound(1); y++)
+            {
+                for (int x = 0; x < board.GetUpperBound(0); x++)
+                {
+                    if (board[x, y] == '@')
+                    {
+                        if (distances[x, y] < lowestScore)
+                        {
+                            lowestScore = distances[x, y];
+                            lowests = new List<(int x, int y)> { (x, y) };
+                        }
+                        else if (distances[x, y] == lowestScore)
+                        {
+                            lowests.Add((x, y));
+                        }
+                    }
+                }
+            }
+
+            var result = (char[,])board.Clone();
+            foreach (var (x, y) in lowests)
+            {
+                result[x, y] = '!';
+            }
+            return result;
         }
 
         private static int[,] Distances(char[,] board, int startX, int startY)
@@ -28,8 +108,6 @@ namespace Day15
             for (int y = 0; y < board.GetUpperBound(1); y++)
                 for (int x = 0; x < board.GetUpperBound(0); x++)
                     result[x, y] = int.MaxValue;
-
-
 
             var toExamine = new Stack<(int x, int y)>();
 
