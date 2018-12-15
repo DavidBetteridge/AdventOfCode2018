@@ -8,45 +8,172 @@ namespace Day15
     {
         static void Main(string[] args)
         {
-            var board = Transpose(System.IO.File.ReadLines("Sample2.txt").Select(a => a.ToCharArray()).ToArray());
-            Display(board);
+            var board = Transpose(System.IO.File.ReadLines("Sample4.txt").Select(a => a.ToCharArray()).ToArray());
 
-            var startX = 2;
-            var startY = 1;
 
-            var inRange = InRange(board);
-            Display(inRange);
+            var units = new List<Unit>();
+            for (int y = 0; y < board.GetUpperBound(1); y++)
+            {
+                for (int x = 0; x < board.GetUpperBound(0); x++)
+                {
+                    if (board[x, y] == 'G' || board[x, y] == 'E')
+                    {
+                        units.Add(new Unit()
+                        {
+                            AttackPower = 3,
+                            HitPoints = 200,
+                            IsAlive = true,
+                            IsElf = (board[x, y] == 'E'),
+                            X = x,
+                            Y = y
+                        });
+                    }
+                }
+            }
+            Display(board, units);
 
-            var reachable = Reachable(inRange, startX, startY);
-            Display(reachable);
+            for (int round = 1; round < 30; round++)
+            {
 
-            var distances = Distances(board, startX, startY);
-            Display(distances);
+                foreach (var unit in units)
+                {
+                    if (unit.IsAlive)
+                    {
+                        if (InRange(board, unit))
+                        {
+                            Attack(board, units, unit);
+                        }
+                        else
+                        {
+                            board = MoveUnit(board, unit);
+                            Attack(board, units, unit);
+                        }
+                    }
+                }
 
+
+                Console.WriteLine("");
+                Console.WriteLine("After Round " + round);
+                Display(board, units);
+                System.Console.ReadKey();
+            }
+
+
+        }
+
+
+        private static void Attack(char[,] board, List<Unit> units, Unit unit)
+        {
+            var unitToAttack = UnitToAttack(board, units, unit);
+            if (unitToAttack == null) return;  //nothing to do
+
+            unitToAttack.HitPoints = unitToAttack.HitPoints - unit.AttackPower;
+            if (unitToAttack.HitPoints <= 0)
+            {
+                unitToAttack.IsAlive = false;
+                board[unitToAttack.X, unitToAttack.Y] = '.';
+            }
+        }
+
+        private static Unit UnitAtPosition(List<Unit> units, int x, int y)
+        {
+            return units.SingleOrDefault(unit => unit.IsAlive &&
+                                                 unit.X == x &&
+                                                 unit.Y == y);
+        }
+
+        public static Unit UnitToAttack(char[,] board, List<Unit> units, Unit unit)
+        {
+            var left = int.MaxValue;
+            if (unit.X > 0)
+            {
+                var enemy = UnitAtPosition(units, unit.X - 1, unit.Y);
+                if (enemy != null && enemy.IsElf != unit.IsElf)
+                {
+                    left = enemy.HitPoints;
+                }
+            }
+
+            var up = int.MaxValue;
+            if (unit.Y > 0)
+            {
+                var enemy = UnitAtPosition(units, unit.X, unit.Y - 1);
+                if (enemy != null && enemy.IsElf != unit.IsElf)
+                {
+                    up = enemy.HitPoints;
+                }
+            }
+
+            var right = int.MaxValue;
+            if (unit.X < board.GetUpperBound(0))
+            {
+                var enemy = UnitAtPosition(units, unit.X + 1, unit.Y);
+                if (enemy != null && enemy.IsElf != unit.IsElf)
+                {
+                    right = enemy.HitPoints;
+                }
+            }
+
+            var down = int.MaxValue;
+            if (unit.Y < board.GetUpperBound(1))
+            {
+                var enemy = UnitAtPosition(units, unit.X, unit.Y + 1);
+                if (enemy != null && enemy.IsElf != unit.IsElf)
+                {
+                    down = enemy.HitPoints;
+                }
+            }
+
+            var lowest = Math.Min(Math.Min(Math.Min(left, up), right), down);
+            if (lowest == int.MaxValue) return null;
+
+            if (up == lowest) return UnitAtPosition(units, unit.X, unit.Y - 1);
+            if (left == lowest) return UnitAtPosition(units, unit.X - 1, unit.Y);
+            if (right == lowest) return UnitAtPosition(units, unit.X + 1, unit.Y);
+            if (down == lowest) return UnitAtPosition(units, unit.X, unit.Y + 1);
+
+            throw new Exception("no lowest");
+        }
+
+
+        private static bool InRange(char[,] board, Unit unit)
+        {
+            var enemy = unit.IsElf ? 'G' : 'E';
+
+            return (ReadCell(board, unit.X + 1, unit.Y) == enemy ||
+                    ReadCell(board, unit.X - 1, unit.Y) == enemy ||
+                    ReadCell(board, unit.X, unit.Y + 1) == enemy ||
+                    ReadCell(board, unit.X, unit.Y - 1) == enemy);
+        }
+        private static char[,] MoveUnit(char[,] board, Unit unit)
+        {
+            var unitIs = board[unit.X, unit.Y];
+            var enemy = unit.IsElf ? 'G' : 'E';
+            var inRange = InRange(board, enemy);
+            var reachable = Reachable(inRange, unit.X, unit.Y);
+            var distances = Distances(board, unit.X, unit.Y);
             var nearest = Nearest(reachable, distances);
-            Display(nearest);
 
-            var chosen = Choose(nearest, startX, startY);
+            var chosen = Choose(nearest, unit.X, unit.Y);
+            if (chosen.x == -1 && chosen.y == -1) return board;  //no where to move
+
             var withChosen = (char[,])board.Clone();
             withChosen[chosen.x, chosen.y] = '+';
-            Display(withChosen);
 
             var shortestPath = Distances(board, chosen.x, chosen.y);
-            Display(shortestPath);
 
-            var step = FindStep(shortestPath, startX, startY);
+            var step = FindStep(shortestPath, unit.X, unit.Y);
             var withStep = (char[,])board.Clone();
-            withStep[startX, startY] = '.';
-            withStep[step.X, step.Y] = 'E';
-            Display(withStep);
+            withStep[unit.X, unit.Y] = '.';
+            withStep[step.X, step.Y] = unitIs;
+            unit.X = step.X;
+            unit.Y = step.Y;
 
-            System.Console.ReadKey();
+            return withStep;
         }
 
         private static (int X, int Y) FindStep(int[,] shortestPath, int x, int y)
         {
-            var lowests = new List<(int x, int y)>();
-
             var left = (x > 0) ? shortestPath[x - 1, y] : int.MaxValue;
             var up = (y > 0) ? shortestPath[x, y - 1] : int.MaxValue;
             var right = (x < shortestPath.GetUpperBound(0)) ? shortestPath[x + 1, y] : int.MaxValue;
@@ -67,7 +194,7 @@ namespace Day15
                 for (int x = 0; x < board.GetUpperBound(0); x++)
                     if (board[x, y] == '!') return (x, y);
 
-            throw new System.Exception("Not found");
+            return (-1, -1);
         }
 
         private static char[,] Nearest(char[,] board, int[,] distances)
@@ -192,7 +319,7 @@ namespace Day15
             return result;
         }
 
-        private static char[,] InRange(char[,] board)
+        private static char[,] InRange(char[,] board, char enemy)
         {
             var result = (char[,])board.Clone();
 
@@ -202,10 +329,10 @@ namespace Day15
                 {
                     if (result[x, y] == '.')
                     {
-                        if (ReadCell(result, x + 1, y) == 'G' ||
-                            ReadCell(result, x - 1, y) == 'G' ||
-                            ReadCell(result, x, y + 1) == 'G' ||
-                            ReadCell(result, x, y - 1) == 'G')
+                        if (ReadCell(result, x + 1, y) == enemy ||
+                            ReadCell(result, x - 1, y) == enemy ||
+                            ReadCell(result, x, y + 1) == enemy ||
+                            ReadCell(result, x, y - 1) == enemy)
                         {
                             result[x, y] = '?';
                         }
@@ -225,16 +352,22 @@ namespace Day15
             return ' ';
         }
 
-        private static void Display(char[,] board)
+        private static void Display(char[,] board, List<Unit> units)
         {
             for (int y = 0; y <= board.GetUpperBound(1); y++)
             {
                 var line = "";
+                var postFix = "";
                 for (int x = 0; x <= board.GetUpperBound(0); x++)
                 {
                     line += board[x, y];
+
+                    var unit = UnitAtPosition(units, x, y);
+                    if (unit != null)
+                        postFix = postFix + $"({(unit.IsElf ? 'E' : 'G')}{unit.HitPoints})";
+
                 }
-                System.Console.WriteLine(line);
+                System.Console.WriteLine(line + " " + postFix);
             }
         }
 
