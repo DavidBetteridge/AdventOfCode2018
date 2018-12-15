@@ -24,37 +24,33 @@ namespace Day14
 
         private static void Part2(string lookfor)
         {
+            var lookForAsBytes = lookfor.ToCharArray().Select(c => byte.Parse(c.ToString())).ToArray();
+
             var elf1 = 0;
             var elf2 = 1;
 
-            var recipes = new List<int>();
+            var recipes = new List<byte>();
             recipes.Add(3);
             recipes.Add(7);
 
-            var recipesText = "37".PadLeft(lookfor.Length,'0');
-
-            while (recipesText != lookfor)
+            while (!EndsWith(recipes, lookForAsBytes))
             {
-                var nextrecipe = recipes[elf1] + recipes[elf2];
+                var nextrecipe = (byte)(recipes[elf1] + recipes[elf2]);
 
                 if (nextrecipe > 9)
                 {
-                    var first = nextrecipe / 10;
-                    var second = nextrecipe % 10;
+                    var first = (byte)(nextrecipe / 10);
+                    var second = (byte)(nextrecipe % 10);
+                    recipes.Add(first);
 
-                    recipes.Add((byte)first);
-                    recipesText = recipesText.Substring(1) + first.ToString();
-
-                    if (recipesText != lookfor)
+                    if (!EndsWith(recipes, lookForAsBytes))
                     {
-                        recipes.Add((byte)second);
-                        recipesText = recipesText.Substring(1) + second.ToString();
+                        recipes.Add(second);
                     }
                 }
                 else
                 {
-                    recipes.Add((byte)nextrecipe);
-                    recipesText = recipesText.Substring(1) + nextrecipe.ToString();
+                    recipes.Add(nextrecipe);
                 }
 
                 elf1 = (elf1 + recipes[elf1] + 1) % recipes.Count;
@@ -62,6 +58,18 @@ namespace Day14
             }
 
             System.Console.WriteLine($"{recipes.Count - lookfor.Length}");
+        }
+
+        private static bool EndsWith(List<byte> recipesText, byte[] lookForAsBytes)
+        {
+            var upper = lookForAsBytes.Length;
+            if (recipesText.Count < upper) return false;
+
+            for (int i = 0; i < upper; i++)
+            {
+                if (recipesText[recipesText.Count - upper + i] != lookForAsBytes[i]) return false;
+            }
+            return true;
         }
 
         private static void Part1(int after)
