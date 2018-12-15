@@ -8,5 +8,6 @@
         public bool IsAlive { get; set; }
         public int HitPoints { get; set; }
         public int AttackPower { get; set; }
+        public int LastRoundPlayed { get; set; }
     }
 }

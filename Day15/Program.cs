@@ -8,7 +8,7 @@ namespace Day15
     {
         static void Main(string[] args)
         {
-            var board = Transpose(System.IO.File.ReadLines("Sample4.txt").Select(a => a.ToCharArray()).ToArray());
+            var board = Transpose(System.IO.File.ReadLines("Input.txt").Select(a => a.ToCharArray()).ToArray());
 
 
             var units = new List<Unit>();
@@ -32,11 +32,12 @@ namespace Day15
             }
             Display(board, units);
 
-            for (int round = 1; round < 30; round++)
+            var round = 0;
+            while (true)
             {
-
-                foreach (var unit in units)
+                foreach (var unit in units.OrderBy(u => u.Y).ThenBy(u => u.X))
                 {
+                    unit.LastRoundPlayed = round;
                     if (unit.IsAlive)
                     {
                         if (InRange(board, unit))
@@ -48,19 +49,48 @@ namespace Day15
                             board = MoveUnit(board, unit);
                             Attack(board, units, unit);
                         }
+
+                        if (IsFinished(units))
+                        {
+                            if (units.Any(u => u.IsAlive && u.LastRoundPlayed != round))
+                            {
+                                //Round not complete
+                            }
+                            else
+                            {
+                                // Round complete
+                                round++;
+                            }
+
+                            Console.WriteLine("Finished after round " + round + " score was " + Score(units, round));
+                            Display(board, units);
+                            System.Console.ReadKey();
+                        }
                     }
                 }
 
+                round++;
 
-                Console.WriteLine("");
-                Console.WriteLine("After Round " + round);
-                Display(board, units);
-                System.Console.ReadKey();
+                if (round == 28)
+                {
+                    Console.WriteLine("");
+                    Console.WriteLine("After Round " + round);
+                    Display(board, units);
+                }
             }
-
-
+            System.Console.ReadKey();
         }
 
+        private static bool IsFinished(List<Unit> units)
+        {
+            return !units.Any(u => u.IsAlive && u.IsElf) ||
+                   !units.Any(u => u.IsAlive && !u.IsElf);
+        }
+
+        private static int Score(List<Unit> units, int completeRounds)
+        {
+            return completeRounds * units.Where(u => u.IsAlive).Sum(u => u.HitPoints);
+        }
 
         private static void Attack(char[,] board, List<Unit> units, Unit unit)
         {
