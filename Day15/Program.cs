@@ -8,8 +8,90 @@ namespace Day15
     {
         static void Main(string[] args)
         {
-            var board = Transpose(System.IO.File.ReadLines("Input.txt").Select(a => a.ToCharArray()).ToArray());
+            Part2();
+        }
 
+        static void Part2()
+        {
+            var elfPower = 4;
+            while (true)
+            {
+                Console.WriteLine("Trying " + elfPower);
+
+                var board = Transpose(System.IO.File.ReadLines("Input.txt").Select(a => a.ToCharArray()).ToArray());
+
+                var units = new List<Unit>();
+                for (int y = 0; y < board.GetUpperBound(1); y++)
+                {
+                    for (int x = 0; x < board.GetUpperBound(0); x++)
+                    {
+                        if (board[x, y] == 'G' || board[x, y] == 'E')
+                        {
+                            units.Add(new Unit()
+                            {
+                                AttackPower = (board[x, y] == 'E') ? elfPower : 3,
+                                HitPoints = 200,
+                                IsAlive = true,
+                                IsElf = (board[x, y] == 'E'),
+                                X = x,
+                                Y = y
+                            });
+                        }
+                    }
+                }
+
+                var round = 0;
+                while (true)
+                {
+                    foreach (var unit in units.OrderBy(u => u.Y).ThenBy(u => u.X))
+                    {
+                        unit.LastRoundPlayed = round;
+                        if (unit.IsAlive)
+                        {
+                            if (InRange(board, unit))
+                            {
+                                Attack(board, units, unit);
+                            }
+                            else
+                            {
+                                board = MoveUnit(board, unit);
+                                Attack(board, units, unit);
+                            }
+
+                            if (AnElfIsDead(units)) break;
+
+                            if (IsFinished(units))
+                            {
+                                Console.WriteLine("Elfs won using a power of " + elfPower);
+
+                                if (units.Any(u => u.IsAlive && u.LastRoundPlayed != round))
+                                {
+                                    //Round not complete
+                                }
+                                else
+                                {
+                                    // Round complete
+                                    round++;
+                                }
+
+                                Console.WriteLine("Finished after round " + round + " score was " + Score(units, round));
+                                Display(board, units);
+                                System.Console.ReadKey();
+                            }
+
+                        }
+                    }
+                    round++;
+
+                    if (AnElfIsDead(units)) break;
+                }
+
+                elfPower++;
+            }
+        }
+        static void Part1()
+        {
+            var board = Transpose(System.IO.File.ReadLines("Input.txt").Select(a => a.ToCharArray()).ToArray());
 
             var units = new List<Unit>();
             for (int y = 0; y < board.GetUpperBound(1); y++)
@@ -79,6 +161,11 @@ namespace Day15
                 }
             }
             System.Console.ReadKey();
+        }
+
+        private static bool AnElfIsDead(List<Unit> units)
+        {
+            return units.Any(u => !u.IsAlive && u.IsElf);
         }
 
         private static bool IsFinished(List<Unit> units)
