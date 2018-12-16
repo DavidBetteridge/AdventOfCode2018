@@ -488,22 +488,6 @@ namespace Day15
             }
         }
 
-
-        private static void Display(int[,] board)
-        {
-            for (int y = 0; y <= board.GetUpperBound(1); y++)
-            {
-                var line = "";
-                for (int x = 0; x <= board.GetUpperBound(0); x++)
-                {
-                    if (board[x, y] == int.MaxValue)
-                        line += "- ";
-                    else
-                        line += board[x, y].ToString() + " ";
-                }
-                System.Console.WriteLine(line);
-            }
-        }
         private static char[,] Transpose(char[][] matrix)
         {
             int w = matrix.Count();
