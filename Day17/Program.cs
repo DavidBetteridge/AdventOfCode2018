@@ -15,7 +15,7 @@ namespace Day17
         }
         static void Main(string[] args)
         {
-            var scans = System.IO.File.ReadAllLines("Sample.txt").Select(line => new Scan(line));
+            var scans = System.IO.File.ReadAllLines("Input.txt").Select(line => new Scan(line));
             var minY = scans.Min(scan => scan.StartY);
             var maxY = scans.Max(scan => scan.EndY) + 1;
             var minX = scans.Min(scan => scan.StartX) - 1;
@@ -28,15 +28,16 @@ namespace Day17
             foreach (var scan in scans)
                 AddClayToGrid(grid, scan, minX);
 
-            DisplayGrid(grid);
+             DisplayGrid(grid);
 
-            var tileCount = 0;
-            while (true)
-            {
-                AddWater(grid, minX);
-                DisplayGrid(grid);
-                tileCount++;
-            }
+
+            AddWater(grid, minX);
+          //  DisplayGrid(grid);
+
+            var part1 = WorkOutScoreForPart1(grid);
+
+            Console.WriteLine(part1);
+            Console.ReadKey();
 
         }
 
@@ -48,35 +49,47 @@ namespace Day17
             FlowDown(grid, x, y);
 
         }
-        private static bool? FlowDown(char[,] grid, int x, int y)
+        private static void FlowDown(char[,] grid, int x, int y)
         {
+        //    Console.WriteLine($"FlowDown {x},{y}");
+
             if (y >= grid.GetUpperBound(1))
             {
+                //Infinite
                 grid[x, y] = Squares.WaterFlow;
-                return null;//null means infinite
+                return;
             }
 
-            if (grid[x, y + 1] == Squares.Clay) return false;
-            if (grid[x, y + 1] == Squares.Sand) grid[x, y] = Squares.WaterFlow;
-            y++;
-
-            var downResult = FlowDown(grid, x, y);
-            if (!downResult.HasValue) return null;
-            if (downResult.Value)
+            if (grid[x, y + 1] == Squares.Sand)
             {
-                return true;
+                FlowDown(grid, x, y + 1);
+                if (grid[x, y + 1] == Squares.WaterFlow)
+                {
+                    grid[x, y] = Squares.WaterFlow;
+                    return;
+                }
             }
 
-            if (grid[x, y] == Squares.Sand || grid[x, y] == Squares.WaterFlow)
+            if (grid[x - 1, y] == Squares.Clay)
             {
                 grid[x, y] = Squares.WaterAtRest;
-                return true;
+            }
+            else
+            {
+                FlowLeft(grid, x - 1, y);
+                grid[x, y] = grid[x - 1, y];
             }
 
-            if (FlowLeft(grid, x, y)) return true;
-            if (FlowRight(grid, x, y)) return true;
-
-            return false;
+            if (grid[x + 1, y] == Squares.Clay)
+            {
+                if (grid[x, y] != Squares.WaterFlow)
+                    grid[x, y] = Squares.WaterAtRest;
+            }
+            else
+            {
+                FlowRight(grid, x + 1, y);
+                grid[x, y] = grid[x + 1, y];
+            }
         }
 
         private static int WorkOutScoreForPart1(char[,] grid)
@@ -93,51 +106,63 @@ namespace Day17
             return score;
         }
 
-        private static bool FlowRight(char[,] grid, int x, int y)
+        private static void FlowRight(char[,] grid, int x, int y)
         {
-            if (grid[x + 1, y] == Squares.Clay) return false;
-            x++;
+        //    Console.WriteLine($"FlowRight {x},{y}");
 
-            var downResult = FlowDown(grid, x, y);
-            if (!downResult.HasValue) return false;
-            if (downResult.Value) return true;
-
-            if (grid[x, y] == Squares.Sand || grid[x, y] == Squares.WaterFlow)
+            if (grid[x, y + 1] == Squares.Sand)
             {
+                FlowDown(grid, x, y + 1);
+                if (grid[x, y + 1] == Squares.WaterFlow)
+                {
+                    //Infinite
+                    grid[x, y] = Squares.WaterFlow;
+                    return;
+                }
+                // else  full
+            }
+
+            // Go right
+            if (grid[x + 1, y] == Squares.Clay)
+            {
+                //hit the wall
                 grid[x, y] = Squares.WaterAtRest;
-                return true;
+                return;
             }
 
-            if (grid[x, y] == Squares.WaterAtRest)
-            {
-                return FlowRight(grid, x, y);
-            }
+            FlowRight(grid, x + 1, y);
 
-            return false;
+            if (grid[x, y] != Squares.WaterFlow)
+                grid[x, y] = grid[x + 1, y];
 
         }
 
-        private static bool FlowLeft(char[,] grid, int x, int y)
+        private static void FlowLeft(char[,] grid, int x, int y)
         {
-            if (grid[x - 1, y] == Squares.Clay) return false;
-            x--;
+        //    Console.WriteLine($"FlowLeft {x},{y}");
 
-            var downResult = FlowDown(grid, x, y);
-            if (!downResult.HasValue) return false;
-            if (downResult.Value) return true;
-
-            if (grid[x, y] == Squares.Sand || grid[x, y] == Squares.WaterFlow)
+            if (grid[x, y + 1] == Squares.Sand)
             {
+                FlowDown(grid, x, y + 1);
+                if (grid[x, y + 1] == Squares.WaterFlow)
+                {
+                    //Infinite
+                    grid[x, y] = Squares.WaterFlow;
+                    return;
+                }
+                // else  full
+            }
+
+            // Go left
+            if (grid[x - 1, y] == Squares.Clay)
+            {
+                //hit the wall
                 grid[x, y] = Squares.WaterAtRest;
-                return true;
+                return;
             }
 
-            if (grid[x, y] == Squares.WaterAtRest)
-            {
-                return FlowLeft(grid, x, y);
-            }
-
-            return false;
+            FlowLeft(grid, x - 1, y);
+            grid[x, y] = grid[x - 1, y];
         }
 
 
