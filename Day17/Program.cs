@@ -35,31 +35,73 @@ namespace Day17
 
         }
 
-        private static void AddWater(char[,] grid, int xOffset)
+        private static bool AddWater(char[,] grid, int xOffset)
         {
             var x = 500 - xOffset;
             var y = 1;
-            AddWater(grid, x, y);
+
+            return AddWater(grid, x, y);
+
         }
 
-        private static void AddWater(char[,] grid, int x, int y)
+        private static bool FlowDown(char[,] grid, int x, int y)
         {
-            if (grid[x, y + 1] == Squares.Sand)
+            if (grid[x, y + 1] == Squares.Clay) return false;
+            y++;
+
+            if (FlowDown(grid, x, y)) return true;
+
+            if (grid[x, y] == Squares.Sand)
             {
-                y++;
-                AddWater(grid, x, y);
+                grid[x, y] = Squares.WaterAtRest;
+                return true;
             }
-            else if (grid[x - 1, y] == Squares.Sand)
+
+            if (FlowLeft(grid, x, y)) return true;
+            if (FlowRight(grid, x, y)) return true;
+
+            return false;
+        }
+
+        private static bool FlowRight(char[,] grid, int x, int y)
+        {
+            if (grid[x + 1, y] == Squares.Clay) return false;
+            x++;
+
+            if (FlowDown(grid, x, y)) return true;
+
+            if (grid[x, y] == Squares.Sand)
             {
-                x--;
-                AddWater(grid, x, y);
+                grid[x, y] = Squares.WaterAtRest;
+                return true;
             }
-            else if (grid[x + 1, y] == Squares.Sand)
+
+            return false;
+
+        }
+
+        private static bool FlowLeft(char[,] grid, int x, int y)
+        {
+            if (grid[x - 1, y] == Squares.Clay) return false;
+            x--;
+
+            if (FlowDown(grid, x, y)) return true;
+
+            if (grid[x, y] == Squares.Sand)
             {
-                x++;
-                AddWater(grid, x, y);
+                grid[x, y] = Squares.WaterAtRest;
+                return true;
             }
-            grid[x, y] = Squares.WaterAtRest;
+
+            return false;
+        }
+
+        private static bool AddWater(char[,] grid, int x, int y)
+        {
+            if (FlowDown(grid, x, y)) return true;
+            if (FlowLeft(grid, x, y)) return true;
+            if (FlowRight(grid, x, y)) return true;
+            return false;
         }
 
         private static void AddClayToGrid(char[,] grid, Scan scan, int xOffset)
