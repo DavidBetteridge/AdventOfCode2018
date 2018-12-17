@@ -11,6 +11,7 @@ namespace Day17
             public const char Sand = '.';
             public const char Clay = '#';
             public const char WaterAtRest = '~';
+            public const char WaterFlow = '|';
         }
         static void Main(string[] args)
         {
@@ -29,29 +30,44 @@ namespace Day17
 
             DisplayGrid(grid);
 
-            AddWater(grid, minX);
-
-            DisplayGrid(grid);
+            var tileCount = 0;
+            while (true)
+            {
+                AddWater(grid, minX);
+                DisplayGrid(grid);
+                tileCount++;
+            }
 
         }
 
-        private static bool AddWater(char[,] grid, int xOffset)
+        private static void AddWater(char[,] grid, int xOffset)
         {
             var x = 500 - xOffset;
             var y = 1;
 
-            return AddWater(grid, x, y);
+            FlowDown(grid, x, y);
 
         }
-
-        private static bool FlowDown(char[,] grid, int x, int y)
+        private static bool? FlowDown(char[,] grid, int x, int y)
         {
+            if (y >= grid.GetUpperBound(1))
+            {
+                grid[x, y] = Squares.WaterFlow;
+                return null;//null means infinite
+            }
+
             if (grid[x, y + 1] == Squares.Clay) return false;
+            if (grid[x, y + 1] == Squares.Sand) grid[x, y] = Squares.WaterFlow;
             y++;
 
-            if (FlowDown(grid, x, y)) return true;
+            var downResult = FlowDown(grid, x, y);
+            if (!downResult.HasValue) return null;
+            if (downResult.Value)
+            {
+                return true;
+            }
 
-            if (grid[x, y] == Squares.Sand)
+            if (grid[x, y] == Squares.Sand || grid[x, y] == Squares.WaterFlow)
             {
                 grid[x, y] = Squares.WaterAtRest;
                 return true;
@@ -63,17 +79,38 @@ namespace Day17
             return false;
         }
 
+        private static int WorkOutScoreForPart1(char[,] grid)
+        {
+            var score = 0;
+            for (int y = 0; y <= grid.GetUpperBound(1); y++)
+            {
+                for (int x = 0; x <= grid.GetUpperBound(0); x++)
+                {
+                    if (grid[x, y] == Squares.WaterAtRest || grid[x, y] == Squares.WaterFlow)
+                        score++;
+                }
+            }
+            return score;
+        }
+
         private static bool FlowRight(char[,] grid, int x, int y)
         {
             if (grid[x + 1, y] == Squares.Clay) return false;
             x++;
 
-            if (FlowDown(grid, x, y)) return true;
+            var downResult = FlowDown(grid, x, y);
+            if (!downResult.HasValue) return false;
+            if (downResult.Value) return true;
 
-            if (grid[x, y] == Squares.Sand)
+            if (grid[x, y] == Squares.Sand || grid[x, y] == Squares.WaterFlow)
             {
                 grid[x, y] = Squares.WaterAtRest;
                 return true;
+            }
+
+            if (grid[x, y] == Squares.WaterAtRest)
+            {
+                return FlowRight(grid, x, y);
             }
 
             return false;
@@ -85,24 +122,25 @@ namespace Day17
             if (grid[x - 1, y] == Squares.Clay) return false;
             x--;
 
-            if (FlowDown(grid, x, y)) return true;
+            var downResult = FlowDown(grid, x, y);
+            if (!downResult.HasValue) return false;
+            if (downResult.Value) return true;
 
-            if (grid[x, y] == Squares.Sand)
+            if (grid[x, y] == Squares.Sand || grid[x, y] == Squares.WaterFlow)
             {
                 grid[x, y] = Squares.WaterAtRest;
                 return true;
             }
 
+            if (grid[x, y] == Squares.WaterAtRest)
+            {
+                return FlowLeft(grid, x, y);
+            }
+
             return false;
         }
 
-        private static bool AddWater(char[,] grid, int x, int y)
-        {
-            if (FlowDown(grid, x, y)) return true;
-            if (FlowLeft(grid, x, y)) return true;
-            if (FlowRight(grid, x, y)) return true;
-            return false;
-        }
+
 
         private static void AddClayToGrid(char[,] grid, Scan scan, int xOffset)
         {
@@ -120,6 +158,8 @@ namespace Day17
         }
         private static void DisplayGrid(char[,] grid)
         {
+            Console.WriteLine("");
+
             for (int y = 0; y <= grid.GetUpperBound(1); y++)
             {
                 var line = "";
@@ -129,7 +169,7 @@ namespace Day17
                 }
                 Console.WriteLine(line);
             }
-            Console.ReadKey();
+            Console.ReadKey(true);
         }
     }
 }
