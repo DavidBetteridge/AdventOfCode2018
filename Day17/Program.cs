@@ -16,7 +16,7 @@ namespace Day17
         }
         static void Main(string[] args)
         {
-            var scans = System.IO.File.ReadAllLines("Input.txt").Select(line => new Scan(line));
+            var scans = System.IO.File.ReadAllLines("input.txt").Select(line => new Scan(line));
             var minY = scans.Min(scan => scan.StartY);
             var maxY = scans.Max(scan => scan.EndY) + 1;
             var minX = scans.Min(scan => scan.StartX) - 1;
@@ -29,26 +29,25 @@ namespace Day17
             foreach (var scan in scans)
                 AddClayToGrid(grid, scan, minX);
 
-            WriteToFile(grid);
+            WriteToFile(grid, minX);
 
             //DisplayGrid(Console.Out, grid);
 
 
             AddWater(grid, minX);
             //  DisplayGrid(grid);
-            WriteToFile(grid);
-            var part1 = WorkOutScoreForPart1(grid);
+            WriteToFile(grid, minX);
+            var part1 = WorkOutScoreForPart1(grid, minY, maxY);
 
             Console.WriteLine(part1);
             Console.ReadKey();
-
         }
 
-        private static void WriteToFile(char[,] grid)
+        private static void WriteToFile(char[,] grid, int minX)
         {
             using (var sw = File.CreateText("inputgrid.txt"))
             {
-                DisplayGrid(sw, grid);
+                DisplayGrid(sw, grid, minX);
             }
         }
 
@@ -62,11 +61,6 @@ namespace Day17
         }
         private static void FlowDown(char[,] grid, int x, int y)
         {
-            if (x == 350 && y == 1903)
-            {
-
-            }
-
             if (y >= grid.GetUpperBound(1))
             {
                 //Infinite
@@ -82,7 +76,7 @@ namespace Day17
             }
 
 
-                if (grid[x, y + 1] == Squares.Sand)
+            if (grid[x, y + 1] == Squares.Sand)
             {
                 FlowDown(grid, x, y + 1);
                 if (grid[x, y + 1] == Squares.WaterFlow)
@@ -114,12 +108,33 @@ namespace Day17
                 if (grid[x, y] != Squares.WaterFlow)
                     grid[x, y] = grid[x + 1, y];
             }
+
+            if (grid[x + 1, y] == Squares.WaterFlow)
+            {
+                var a = x - 1;
+                while (grid[a, y] == Squares.WaterAtRest)
+                {
+                    grid[a, y] = Squares.WaterFlow;
+                    a--;
+                }
+            }
+
+            if (grid[x - 1, y] == Squares.WaterFlow)
+            {
+                var a = x + 1;
+                while (grid[a, y] == Squares.WaterAtRest)
+                {
+                    grid[a, y] = Squares.WaterFlow;
+                    a++;
+                }
+            }
+
         }
 
-        private static int WorkOutScoreForPart1(char[,] grid)
+        private static int WorkOutScoreForPart1(char[,] grid, int minY, int maxY)
         {
             var score = 0;
-            for (int y = 0; y <= grid.GetUpperBound(1); y++)
+            for (int y = minY; y < maxY; y++)
             {
                 for (int x = 0; x <= grid.GetUpperBound(0); x++)
                 {
@@ -132,11 +147,6 @@ namespace Day17
 
         private static void FlowRight(char[,] grid, int x, int y)
         {
-            if (x == 350 && y == 1903)
-            {
-
-            }
-
             if (grid[x, y + 1] == Squares.WaterFlow) return;
 
             if (grid[x, y + 1] == Squares.Sand)
@@ -169,10 +179,6 @@ namespace Day17
 
         private static void FlowLeft(char[,] grid, int x, int y)
         {
-            if (x==350 && y ==1903)
-            {
-
-            }
             if (grid[x, y + 1] == Squares.WaterFlow) return;
 
             if (grid[x, y + 1] == Squares.Sand)
@@ -215,13 +221,23 @@ namespace Day17
                     grid[x, y] = Squares.Sand;
 
         }
-        private static void DisplayGrid(TextWriter textWriter, char[,] grid)
+        private static void DisplayGrid(TextWriter textWriter, char[,] grid, int xOffset)
         {
             textWriter.WriteLine("");
 
+            for (int i = 3; i >= 0; i--)
+            {
+                var heading = "      ";
+                for (int x = xOffset; x <= xOffset + grid.GetUpperBound(0); x++)
+                {
+                    heading += (x / (int)(Math.Pow(10, i))) % 10;
+                }
+                textWriter.WriteLine(heading);
+            }
+
             for (int y = 0; y <= grid.GetUpperBound(1); y++)
             {
-                var line = "";
+                var line = y.ToString("0000") + "  ";
                 for (int x = 0; x <= grid.GetUpperBound(0); x++)
                 {
                     line += grid[x, y];
