@@ -92,22 +92,19 @@ let runTest (registersBefore, (arguments:int[]), registersAfter) =
     let B = arguments.[2]
     let C = arguments.[3]
     let ins = findPossibleInstructions registersBefore registersAfter A B C instructions
-    ins |> Seq.length
+    let matches = ins |> Seq.length
+    matches
 
 [<EntryPoint>]
 let main argv =
 
-    let tests = File.ReadLines("Input.txt") |> Seq.chunkBySize 4 |> Seq.map parseTest
+    let tests = File.ReadLines("Input.txt") |> Seq.chunkBySize 4 |> Seq.map parseTest 
     
     let part1 = tests 
                     |> Seq.map runTest 
                     |> Seq.where (fun a -> a >= 3) 
-                    //|> Seq.length
+                    |> Seq.length
 
-    part1 |> Seq.iter (fun i ->  printfn "%o" i)
 
-    //printfn "%o" (part1) 
-   // let machine = { Registers = Array.create 4 0}
-
-    printfn "Hello World from F#!"
+    printfn "%d" (part1) 
     0 // return an integer exit code
