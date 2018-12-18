@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Day18
 {
@@ -13,10 +15,13 @@ namespace Day18
     {
         static void Main(string[] args)
         {
+            //1000000000
             var lines = File.ReadAllLines("Input.txt");
             var rows = lines.Length;
             var columns = lines[0].Length;
             var cells = new char[columns, rows];
+
+
 
             for (int row = 0; row < lines.Length; row++)
             {
@@ -27,16 +32,53 @@ namespace Day18
                 }
             }
 
-            for (int minute = 0; minute < 10; minute++)
+            var seenBoards = new Dictionary<string, int>();
+            var cycle = new Dictionary<string, int>();
+            for (int minute = 1; minute < 20000; minute++)
             {
                 cells = NextGeneration(cells);
-                DisplayCells(Console.Out, cells);
+
+                if (cycle.Count < 28)
+                {
+                    var hash = Hash(cells);
+                    if (seenBoards.TryGetValue(hash, out var lastSeen))
+                    {
+                        if (!cycle.ContainsKey(hash))
+                            cycle.Add(hash, Score(cells));
+                    }
+                    else
+                    {
+                        seenBoards.Add(hash, minute);
+                    }
+                }
             }
 
-            Score(cells);
+            Predict(1000000000, cycle);
+            Console.ReadKey(true);
         }
 
-        private static void Score(char[,] cells)
+        static void Predict(long target, Dictionary<string, int> cycle)
+        {
+            const int cycleSize = 28;
+            var a = target - 1000;
+            var b = a % cycleSize;
+
+            var score = cycle.Values.ToArray()[b + 12];
+            Console.WriteLine($"Predict {target} is {score}");
+        }
+        private static string Hash(char[,] cells)
+        {
+            var rows = cells.GetUpperBound(1);
+            var columns = cells.GetUpperBound(0);
+            var result = "";
+            for (int row = 0; row <= rows; row++)
+                for (int column = 0; column <= columns; column++)
+                    result += cells[column, row];
+
+            return result;
+        }
+
+        private static int Score(char[,] cells)
         {
             var rows = cells.GetUpperBound(1);
             var columns = cells.GetUpperBound(0);
@@ -50,8 +92,10 @@ namespace Day18
                     if (cells[column, row] == Acre.Tree) wood++;
                 }
             }
-            Console.WriteLine($"Trees {wood} x  Lumber {lumber} = {wood*lumber}");
-            Console.ReadKey(true);
+            //  Console.WriteLine($"Trees {wood} x  Lumber {lumber} = {wood * lumber}");
+            return wood * lumber;
+
+            //Console.ReadKey(true);
         }
 
         private static char[,] NextGeneration(char[,] cells)
