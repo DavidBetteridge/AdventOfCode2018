@@ -118,6 +118,16 @@ let rec workoutOpCode (opCodesAndPossibleInstructions:list<int * seq<string>>) :
             let reducedCodes' = removeInstruction reducedCodes instruction
             (opCode, instruction) :: workoutOpCode reducedCodes'
 
+let parseInstruction (line:string) =
+    line.Split(' ') |> Array.map int
+
+let runProgram (opCodes:list<int * string>) machine instruction =
+    let [|opCode;A;B;C|] = instruction
+    let (_, instructionName) = opCodes |> List.find ( fun (op, _) -> op = opCode)
+    let (_, fn) = instructions |> List.find (fun (name, fn) -> name = instructionName)
+    fn machine A B C
+    machine
+
 [<EntryPoint>]
 let main argv =
 
@@ -133,7 +143,7 @@ let main argv =
     printfn "Part 1 is %d" (part1) 
 
 
-    let opCodes = tests |> Seq.map (fun ((before, arguments, after)) -> arguments.[0])
+    let opCodes = tests |> Seq.map (fun ((_, arguments, _)) -> arguments.[0])
     let names = testResults |> Seq.map (fun results -> results |> Seq.map (fun (name,_) -> name))
     let multipleOpCodesAndPossibleInstructions = names |> Seq.zip opCodes
 
@@ -143,6 +153,10 @@ let main argv =
                                             |> Seq.map (fun (opCode, instructions) -> (opCode, intersection instructions))
 
     let opCodes = workoutOpCode (List.ofSeq opCodesAndPossibleInstructions)
-    opCodes |> List.iter (fun (opCode, name) -> printfn "%d %s" opCode name)
 
+    let program = File.ReadLines("Input Part 2.txt") |> Seq.map parseInstruction
+    let machine = { Registers = Array.create 4 0}
+    let runner = runProgram opCodes
+    let finalMachine = program |> Seq.fold runner machine
+    printfn "Part 2 is %d" finalMachine.Registers.[0]
     0 // return an integer exit code

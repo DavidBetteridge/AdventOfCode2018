@@ -6,6 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Input Part 2.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Input.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
