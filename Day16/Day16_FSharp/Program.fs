@@ -91,20 +91,58 @@ let runTest (registersBefore, (arguments:int[]), registersAfter) =
     let A = arguments.[1]
     let B = arguments.[2]
     let C = arguments.[3]
-    let ins = findPossibleInstructions registersBefore registersAfter A B C instructions
-    let matches = ins |> Seq.length
-    matches
+    findPossibleInstructions registersBefore registersAfter A B C instructions
+
+let rec intersection (listOfinstructions:seq<seq<string>>) : seq<string> =
+    match List.ofSeq listOfinstructions with
+    | [] -> Seq.empty
+    | (x1::[]) -> x1
+    | (x1::x2::[]) -> Set.intersect (Set.ofSeq x1) (Set.ofSeq x2) |> Set.toSeq
+    | (x1::x2::xs) -> let x = Set.intersect (Set.ofSeq x1) (Set.ofSeq x2) |> Set.toSeq
+                      intersection (x::xs)
+
+let removeOpCode (fullList:list<int * seq<string>>) (opCode:int) : list<int * seq<string>> = 
+    fullList |> List.where (fun (op, _) -> op <> opCode)
+
+let removeInstruction (fullList:list<int * seq<string>>) (instruction:string) : list<int * seq<string>> = 
+    fullList |> List.map (fun (op, instructions) -> (op, instructions |> Seq.where (fun instr -> instr <> instruction)  ))
+
+let rec workoutOpCode (opCodesAndPossibleInstructions:list<int * seq<string>>) : list<int * string> =
+    match opCodesAndPossibleInstructions with
+    | [] -> List.Empty
+    | _ ->
+            let (opCode, instructions) = opCodesAndPossibleInstructions 
+                                            |> Seq.find (fun (_, possible) -> possible |> Seq.length = 1)
+            let instruction = instructions |> Seq.head         
+            let reducedCodes = removeOpCode opCodesAndPossibleInstructions opCode
+            let reducedCodes' = removeInstruction reducedCodes instruction
+            (opCode, instruction) :: workoutOpCode reducedCodes'
 
 [<EntryPoint>]
 let main argv =
 
     let tests = File.ReadLines("Input.txt") |> Seq.chunkBySize 4 |> Seq.map parseTest 
     
-    let part1 = tests 
-                    |> Seq.map runTest 
+    let testResults = tests |> Seq.map runTest 
+
+    let part1 = testResults 
+                    |> Seq.map (fun instructions -> Seq.length instructions) 
                     |> Seq.where (fun a -> a >= 3) 
                     |> Seq.length
 
+    printfn "Part 1 is %d" (part1) 
 
-    printfn "%d" (part1) 
+
+    let opCodes = tests |> Seq.map (fun ((before, arguments, after)) -> arguments.[0])
+    let names = testResults |> Seq.map (fun results -> results |> Seq.map (fun (name,_) -> name))
+    let multipleOpCodesAndPossibleInstructions = names |> Seq.zip opCodes
+
+    let opCodesAndPossibleInstructions = multipleOpCodesAndPossibleInstructions 
+                                            |> Seq.groupBy (fun (op, _) -> op)
+                                            |> Seq.map (fun (opCode, instructions) -> (opCode, instructions |> Seq.map snd ))
+                                            |> Seq.map (fun (opCode, instructions) -> (opCode, intersection instructions))
+
+    let opCodes = workoutOpCode (List.ofSeq opCodesAndPossibleInstructions)
+    opCodes |> List.iter (fun (opCode, name) -> printfn "%d %s" opCode name)
+
     0 // return an integer exit code
