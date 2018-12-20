@@ -5,28 +5,24 @@ namespace Day20
 {
     class PathWalker
     {
-        private readonly string _path;
         private readonly Map _map;
-        private int _offset;
 
-        public PathWalker(string path, Map map)
+        public PathWalker(Map map)
         {
-            _path = path;
             _map = map;
-            _offset = 1;
         }
 
-        internal void WalkPath()
+        internal void WalkPath(string path, int offset)
         {
-            if (_offset >= _path.Length - 1) return;
+            if (offset >= path.Length - 1) return;
 
-            switch (_path[_offset])
+            switch (path[offset])
             {
                 case '$':
                     return;
 
                 case '(':
-                    WalkOptions();
+                    WalkOptions(path, offset);
                     return;
 
                 case 'N':
@@ -46,32 +42,31 @@ namespace Day20
                     break;
 
                 default:
-                    throw new Exception($"Unknown symbol {_path[_offset]}");
+                    throw new Exception($"Unknown symbol {path[offset]}");
             }
-            _offset++;
-            WalkPath();
+            WalkPath(path, offset + 1);
         }
 
-        private void WalkOptions()
+        private void WalkOptions(string path, int offset)
         {
             var options = new List<string>();
             var openCount = 1;
             var currentLine = "";
 
-            _offset++;
+            offset++;
             while (openCount > 0)
             {
-                switch (_path[_offset])
+                switch (path[offset])
                 {
                     case '(':
                         openCount++;
-                        currentLine += _path[_offset];
+                        currentLine += path[offset];
                         break;
 
                     case ')':
                         openCount--;
                         if (openCount > 0)
-                            currentLine += _path[_offset];
+                            currentLine += path[offset];
                         break;
 
                     case '|':
@@ -81,14 +76,14 @@ namespace Day20
                             currentLine = "";
                         }
                         else
-                            currentLine += _path[_offset];
+                            currentLine += path[offset];
                         break;
 
                     default:
-                        currentLine += _path[_offset];
+                        currentLine += path[offset];
                         break;
                 }
-                _offset++;
+                offset++;
             }
             options.Add(currentLine);
 
@@ -96,12 +91,27 @@ namespace Day20
             foreach (var option in options)
             {
                 _map.Location = location;
-                var remainder = _path.Substring(_offset);
-                var path = "^" + option + remainder;
-                var pathWalker = new PathWalker(path, _map);
-                pathWalker.WalkPath();
+                var remainder = path.Substring(offset);
+                var path2 = option + remainder;
+                WalkPath(path2, 0);
             }
-         //   Console.ReadKey(true);
+            //   Console.ReadKey(true);
         }
+
+        //private static unsafe string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second)
+        //{
+        //    fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second))
+        //    {
+        //        return string.Create(
+        //            first.Length + second.Length,
+        //            (First: (IntPtr)f, FirstLength: first.Length, Second: (IntPtr)s, SecondLength: second.Length),
+        //            (destination, state) =>
+        //            {
+        //                new Span<char>((char*)state.First, state.FirstLength).CopyTo(destination);
+        //                new Span<char>((char*)state.Second, state.SecondLength).CopyTo(destination.Slice(state.FirstLength));
+        //            });
+        //    }
+        //}
+
     }
 }

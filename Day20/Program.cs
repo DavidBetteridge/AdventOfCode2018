@@ -10,8 +10,8 @@ namespace Day20
             var path = File.ReadAllText("Input.txt");
             var map = new Map();
 
-            var pathWalker = new PathWalker(path, map);
-            pathWalker.WalkPath();
+            var pathWalker = new PathWalker( map);
+            pathWalker.WalkPath(path,1);
 
             var displayer = new DisplayMap();
             displayer.Draw(Console.Out, map);

@@ -7,7 +7,7 @@ namespace Day20
     {
         private int _x;
         private int _y;
-        private readonly Dictionary<(int X, int Y), char> knownLocations = new Dictionary<(int, int), char>();
+        private readonly Dictionary<string, char> knownLocations = new Dictionary<string, char>();
 
         public (int x, int y) Location
         {
@@ -24,7 +24,7 @@ namespace Day20
             knownLocations[MakeKey(0, 0)] = 'X';
         }
 
-        private (int, int) MakeKey(int x, int y) => (x, y);
+        private string MakeKey(int x, int y) => x + "," + y;
 
 
         private void MakeRoom(int x, int y)
@@ -43,30 +43,25 @@ namespace Day20
 
             if (!knownLocations.ContainsKey(MakeKey(_x + 1, _y)))
                 knownLocations[MakeKey(_x + 1, _y)] = '?';
-
-            knownLocations[MakeKey(_x + 1, _y + 1)] = '#';
-            knownLocations[MakeKey(_x - 1, _y + 1)] = '#';
-            knownLocations[MakeKey(_x + 1, _y - 1)] = '#';
-            knownLocations[MakeKey(_x - 1, _y - 1)] = '#';
-
         }
 
         internal char[,] AsGrid()
         {
-            var minX = knownLocations.Keys.Min(a => a.X);
-            var maxX = knownLocations.Keys.Max(a => a.X);
-            var minY = knownLocations.Keys.Min(a => a.Y);
-            var maxY = knownLocations.Keys.Max(a => a.Y);
+            var minX = knownLocations.Keys.Min(a => int.Parse(a.Split(',')[0]));
+            var maxX = knownLocations.Keys.Max(a => int.Parse(a.Split(',')[0]));
+            var minY = knownLocations.Keys.Min(a => int.Parse(a.Split(',')[1]));
+            var maxY = knownLocations.Keys.Max(a => int.Parse(a.Split(',')[1]));
 
             var grid = new char[maxX - minX + 1, maxY - minY + 1];
 
             for (int y = 0; y <= grid.GetUpperBound(1); y++)
                 for (int x = 0; x <= grid.GetUpperBound(0); x++)
-                    grid[x, y] = ' ';
+                    grid[x, y] = '#';
 
             foreach (var item in knownLocations)
             {
-                var (X, Y) = item.Key;
+                var X = int.Parse(item.Key.Split(',')[0]);
+                var Y = int.Parse(item.Key.Split(',')[1]);
                 grid[X - minX, Y - minY] = item.Value == '?' ? '#' : item.Value;
             }
 
