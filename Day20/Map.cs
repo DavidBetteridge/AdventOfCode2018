@@ -7,6 +7,7 @@ namespace Day20
         private int _x;
         private int _y;
         private readonly char[,] knownLocations;
+        private readonly int[,] distances;
         private readonly int _maxN;
         private readonly int _maxS;
         private readonly int _maxW;
@@ -29,16 +30,23 @@ namespace Day20
             var Yrange = _maxN + _maxS;
 
             knownLocations = new char[Xrange, Yrange];
+            distances = new int[Xrange, Yrange];
 
             _x = 0;
             _y = 0;
 
-            MakeRoom(0, 0);
             knownLocations[0 + _maxW, 0 + _maxS] = 'X';
+            MakeRoom(0, 0, -1);
+            distances[0 + _maxW, 0 + _maxS] = 1;
         }
 
-        private void MakeRoom(int x, int y)
+        private void MakeRoom(int x, int y, int distanceToPreviousRoom)
         {
+            var newDistance = distanceToPreviousRoom + 1;
+            var currentDistance = distances[_x + _maxW, _y + _maxS];
+            if (currentDistance == 0 || currentDistance > newDistance)
+                distances[_x + _maxW, _y + _maxS] = newDistance;
+
             knownLocations[_x + _maxW, _y + _maxS] = '.';
 
             if (knownLocations[_x + _maxW, _y + _maxS - 1] == '.')
@@ -52,6 +60,34 @@ namespace Day20
 
             if (knownLocations[_x + _maxW + 1, _y + _maxS] == '.')
                 knownLocations[_x + _maxW + 1, _y + _maxS] = '?';
+        }
+
+        internal int Part1()
+        {
+            var max = int.MinValue;
+            for (int y = 0; y <= distances.GetUpperBound(1); y++)
+            {
+                for (int x = 0; x <= distances.GetUpperBound(0); x++)
+                {
+                    if (distances[x, y] > max)
+                        max = distances[x, y];
+                }
+            }
+            return max - 1;
+        }
+
+        internal int Part2()
+        {
+            var result = 0;
+            for (int y = 0; y <= distances.GetUpperBound(1); y++)
+            {
+                for (int x = 0; x <= distances.GetUpperBound(0); x++)
+                {
+                    if (distances[x, y] >999)
+                        result++;
+                }
+            }
+            return result;
         }
 
         internal char[,] AsGrid()
@@ -94,34 +130,37 @@ namespace Day20
 
         public void WalkN()
         {
+            var currentDistance = distances[_x + _maxW, _y + _maxS];
             knownLocations[_x + _maxW, _y + _maxS - 1] = '-';
 
             _y -= 2;
-            MakeRoom(_x, _y);
+            MakeRoom(_x, _y, currentDistance);
         }
         public void WalkS()
         {
+            var currentDistance = distances[_x + _maxW, _y + _maxS];
             knownLocations[_x + _maxW, _y + _maxS + 1] = '_';
 
             _y += 2;
-            MakeRoom(_x, _y);
+            MakeRoom(_x, _y, currentDistance);
         }
 
         public void WalkW()
         {
+            var currentDistance = distances[_x + _maxW, _y + _maxS];
             knownLocations[_x - 1 + _maxW, _y + _maxS] = '|';
 
             _x -= 2;
-            MakeRoom(_x, _y);
+            MakeRoom(_x, _y, currentDistance);
         }
 
         public void WalkE()
         {
+            var currentDistance = distances[_x + _maxW, _y + _maxS];
             knownLocations[_x + 1 + _maxW, _y + _maxS] = '|';
 
             _x += 2;
-            MakeRoom(_x, _y);
-
+            MakeRoom(_x, _y, currentDistance);
         }
     }
 }
