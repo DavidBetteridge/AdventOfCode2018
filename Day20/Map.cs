@@ -37,14 +37,14 @@ namespace Day20
 
             knownLocations[0 + _maxW, 0 + _maxS] = 'X';
             MakeRoom(0, 0, -1);
-            distances[0 + _maxW, 0 + _maxS] = 1;
+            distances[0 + _maxW, 0 + _maxS] = 0;
         }
 
         private void MakeRoom(int x, int y, int distanceToPreviousRoom)
         {
             var newDistance = distanceToPreviousRoom + 1;
             var currentDistance = distances[_x + _maxW, _y + _maxS];
-            if (currentDistance == 0 || currentDistance > newDistance)
+            if ((currentDistance == 0 || currentDistance > newDistance) && knownLocations[_x + _maxW, _y + _maxS] != 'X')
                 distances[_x + _maxW, _y + _maxS] = newDistance;
 
             knownLocations[_x + _maxW, _y + _maxS] = '.';
@@ -73,7 +73,7 @@ namespace Day20
                         max = distances[x, y];
                 }
             }
-            return max - 1;
+            return max;
         }
 
         internal int Part2()
@@ -83,7 +83,7 @@ namespace Day20
             {
                 for (int x = 0; x <= distances.GetUpperBound(0); x++)
                 {
-                    if (distances[x, y] >999)
+                    if (distances[x, y] >= 1000)
                         result++;
                 }
             }
