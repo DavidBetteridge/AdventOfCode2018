@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Day23
 {
@@ -26,5 +24,20 @@ namespace Day23
         }
 
         public static int operator -(Nanobot a, Nanobot b) => Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y) + Math.Abs(a.Z - b.Z);
+        public static int operator -(Nanobot a, (int X, int Y, int Z) b) => Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y) + Math.Abs(a.Z - b.Z);
+
+        public Region CreateBoundingBox()
+        {
+            return new Region()
+            {
+                X1 = X - SignalRadius,
+                X2 = X + SignalRadius,
+                Y1 = Y - SignalRadius,
+                Y2 = Y + SignalRadius,
+                Z1 = Z - SignalRadius,
+                Z2 = Z + SignalRadius,
+                Score = 1
+            };
+        }
     }
 }
