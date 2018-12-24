@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -13,11 +14,50 @@ namespace Day24
             while (immuneArmy.Any() && infectionArmy.Any())
             {
                 TargetSelection(immuneArmy, infectionArmy);
-                //Attack(immuneArmy, infectionArmy);
-
+                Attack(immuneArmy, infectionArmy);
+                immuneArmy = RemoveDeadGroups(immuneArmy);
+                infectionArmy = RemoveDeadGroups(infectionArmy);
             }
 
+            if (immuneArmy.Any())
+                Console.WriteLine($"Part 1 is {immuneArmy.Sum(grp=>grp.Units)}");
+
+            if (infectionArmy.Any())
+                Console.WriteLine($"Part 1 is {infectionArmy.Sum(grp => grp.Units)}");
+
+            //14294 too low
         }
+
+        private static List<Group> RemoveDeadGroups(List<Group> army)
+        {
+            return army.Where(grp => grp.Units > 0).ToList();
+        }
+
+        private static void Attack(List<Group> immuneArmy, List<Group> infectionArmy)
+        {
+            var allGroups = immuneArmy.Union(infectionArmy)
+                                .Where(grp => grp.Target != null)
+                                .OrderByDescending(grp => grp.Initiative);
+
+            foreach (var attacker in allGroups)
+            {
+                var defender = attacker.Target;
+                var damage = Damage(attacker, defender);
+                if (damage >= (defender.Units * defender.HitPoints))
+                {
+                    //target will be destroyed
+                    defender.Units = 0;
+                }
+                else
+                {
+                    var unitsDamaged = damage / defender.HitPoints;
+                    defender.Units -= unitsDamaged;
+                }
+            }
+
+
+        }
+
         private static void TargetSelection(List<Group> immuneArmy, List<Group> infectionArmy)
         {
             SelectGroupsToAttack(immuneArmy, infectionArmy);
@@ -25,28 +65,28 @@ namespace Day24
 
         }
 
-        private static void SelectGroupsToAttack(List<Group> attackingArmy, List<Group> infectionArmy)
+        private static void SelectGroupsToAttack(List<Group> attackingArmy, List<Group> defendingArmy)
         {
-            foreach (var target in infectionArmy)
+            foreach (var target in defendingArmy)
                 target.UnderAttack = false;
 
             foreach (var attacking in attackingArmy.OrderByDescending(army => army.EffectivePower).OrderBy(army => army.Initiative))
             {
-                var target = infectionArmy
-                                          .Where(army => !army.UnderAttack)
-                                          .GroupBy(defending => Damage(attacking, defending))
-                                          .MaxBy(grp => grp.Key)
-                                          .Select(grp => grp)
-                                          .OrderByDescending(grp => grp.EffectivePower)
-                                          .ThenByDescending(grp => grp.Initiative).FirstOrDefault();
-                if (target == null)
+                attacking.Target = null;
+                var possibleTargets = defendingArmy.Where(army => !army.UnderAttack);
+                if (possibleTargets.Any())
                 {
-                    attacking.Target = null;
-                }
-                else
-                {
-                    target.UnderAttack = true;
-                    attacking.Target = target;
+                    var target = possibleTargets
+                                              .GroupBy(defending => Damage(attacking, defending))
+                                              .MaxBy(grp => grp.Key)
+                                              .Select(grp => grp)
+                                              .OrderByDescending(grp => grp.EffectivePower)
+                                              .ThenByDescending(grp => grp.Initiative).FirstOrDefault();
+                    if (target != null)
+                    {
+                        target.UnderAttack = true;
+                        attacking.Target = target;
+                    }
                 }
             };
         }
