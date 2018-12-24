@@ -20,29 +20,32 @@ namespace Day24
             Units = parser.ReadNextInt();
             parser.Match(" units each with ");
             HitPoints = parser.ReadNextInt();
-            parser.Match(" hit points (");
-
-            //weak to bludgeoning, slashing
-            //weak to cold; immune to bludgeoning, slashing
-            AttackTypes = new List<AttackTypeAndStrength>();
-            var attackTypes = parser.ReadToNext(')');
-            var types = attackTypes.Split("; ", System.StringSplitOptions.None);
-            foreach (var type in types)
+            parser.Match(" hit points ");
+            if (parser.TryMatch("("))
             {
-                var firstSpace = type.IndexOf(' ');
-                var strength = type.Substring(0, firstSpace);
-                var secondSpace = type.IndexOf(' ', firstSpace + 1);
-                var attacks = type.Substring(secondSpace + 1).Split(", ", System.StringSplitOptions.None);
-                foreach (var attack in attacks)
+                //weak to bludgeoning, slashing
+                //weak to cold; immune to bludgeoning, slashing
+                AttackTypes = new List<AttackTypeAndStrength>();
+                var attackTypes = parser.ReadToNext(')');
+                var types = attackTypes.Split("; ", System.StringSplitOptions.None);
+                foreach (var type in types)
                 {
-                    AttackTypes.Add(new AttackTypeAndStrength()
+                    var firstSpace = type.IndexOf(' ');
+                    var strength = type.Substring(0, firstSpace);
+                    var secondSpace = type.IndexOf(' ', firstSpace + 1);
+                    var attacks = type.Substring(secondSpace + 1).Split(", ", System.StringSplitOptions.None);
+                    foreach (var attack in attacks)
                     {
-                        Strength = strength,
-                        AttackType = attack
-                    });
+                        AttackTypes.Add(new AttackTypeAndStrength()
+                        {
+                            Strength = strength,
+                            AttackType = attack
+                        });
+                    }
                 }
+                parser.Match(") ");
             }
-            parser.Match(") with an attack that does ");
+            parser.Match("with an attack that does ");
             Damage = parser.ReadNextInt();
             parser.Match(" ");
             DamageType = parser.ReadNextWord();
