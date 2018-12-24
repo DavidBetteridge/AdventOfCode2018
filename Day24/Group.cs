@@ -22,6 +22,8 @@ namespace Day24
         //immune to radiation; weak to fire, cold
         public Group(string line)
         {
+            DefenceTypes = new List<DefenceTypeAndStrength>();
+
             var parser = new Parser(line);
             Units = parser.ReadNextInt();
             parser.Match(" units each with ");
@@ -31,7 +33,6 @@ namespace Day24
             {
                 //weak to bludgeoning, slashing
                 //weak to cold; immune to bludgeoning, slashing
-                DefenceTypes = new List<DefenceTypeAndStrength>();
                 var attackTypes = parser.ReadToNext(')');
                 var types = attackTypes.Split("; ", System.StringSplitOptions.None);
                 foreach (var type in types)
