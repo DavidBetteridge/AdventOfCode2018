@@ -9,24 +9,73 @@ namespace Day24
     {
         static void Main(string[] args)
         {
-            ParseFile(out var immuneArmy, out var infectionArmy);
+            Part1();
+            Part2();
+            Console.ReadKey(true);
 
+            //5216
+            //15392
+        }
+
+        private static void Part1()
+        {
+            DoBattle(out var immuneArmy, out var infectionArmy, 0);
+
+            if (immuneArmy.Any())
+                Console.WriteLine($"Part 1 (immuneArmy) is {immuneArmy.Sum(grp => grp.Units)}");
+
+            if (infectionArmy.Any())
+                Console.WriteLine($"Part 1 (infectionArmy) is {infectionArmy.Sum(grp => grp.Units)}");
+        }
+
+        private static void Part2()
+        {
+            for (int boostToTry = 0; boostToTry < 1000000; boostToTry++)
+            {
+                Console.Write("Trying " + boostToTry);
+
+                DoBattle(out var immuneArmy, out var infectionArmy, boostToTry);
+                if (!infectionArmy.Any())
+                {
+                    Console.WriteLine(" win for immune");
+                    Console.WriteLine($"Part 2 (immuneArmy) is {immuneArmy.Sum(grp => grp.Units)}");
+                    Console.ReadKey();
+                }
+                else
+                {
+                    Console.WriteLine(" lose for immune");
+                }
+            }
+
+
+        }
+
+        private static void DoBattle(out List<Group> immuneArmy, out List<Group> infectionArmy, int amountToBoostBy)
+        {
+            ParseFile(out immuneArmy, out infectionArmy);
+
+            BoostArmy(immuneArmy, amountToBoostBy);
+
+            var unitCount = 0;
             while (immuneArmy.Any() && infectionArmy.Any())
             {
                 TargetSelection(immuneArmy, infectionArmy);
                 Attack(immuneArmy, infectionArmy);
                 immuneArmy = RemoveDeadGroups(immuneArmy);
                 infectionArmy = RemoveDeadGroups(infectionArmy);
+
+                var newUnitCount = immuneArmy.Sum(g => g.Units) + infectionArmy.Sum(g => g.Units);
+                if (newUnitCount == unitCount) break;
+                unitCount = newUnitCount;
             }
+        }
 
-            if (immuneArmy.Any())
-                Console.WriteLine($"Part 1 is {immuneArmy.Sum(grp => grp.Units)}");
-
-            if (infectionArmy.Any())
-                Console.WriteLine($"Part 1 is {infectionArmy.Sum(grp => grp.Units)}");
-
-            //5216
-            //15392
+        private static void BoostArmy(List<Group> immuneArmy, int amountToBoostBy)
+        {
+            foreach (var grp in immuneArmy)
+            {
+                grp.AttackDamage += amountToBoostBy;
+            }
         }
 
         private static List<Group> RemoveDeadGroups(List<Group> army)

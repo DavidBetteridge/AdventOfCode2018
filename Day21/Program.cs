@@ -335,10 +335,7 @@ namespace Day21
             return processedLines.ToArray();
         }
 
-        static Action addr(int A, int B, int C)
-        {
-            return () => registers[C] = registers[A] + registers[B];
-        }
+        static Action addr(int A, int B, int C) => () => registers[C] = registers[A] + registers[B];
 
         static Action addi(int A, int B, int C)
         {

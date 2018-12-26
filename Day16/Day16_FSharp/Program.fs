@@ -146,11 +146,11 @@ let runProgram opCodes machine instruction =
 
 let workOutOpCodes (tests:seq<(registerState*programLine*registerState)>) testResults = 
     let opCodes = tests |> Seq.map (fun ((_, line, _)) -> line.opCode)
-    let names = testResults |> Seq.map (fun results -> results |> Seq.map (fun (name,_) -> name))
+    let names = testResults |> Seq.map (Seq.map fst)
     let multipleOpCodesAndPossibleInstructions = names |> Seq.zip opCodes
 
     let opCodesAndPossibleInstructions = multipleOpCodesAndPossibleInstructions 
-                                            |> Seq.groupBy (fun (op, _) -> op)
+                                            |> Seq.groupBy fst
                                             |> Seq.map (fun (opCode, instructions) -> (opCode, instructions |> Seq.map snd ))
                                             |> Seq.map (fun (opCode, instructions) -> (opCode, intersection instructions))
 
@@ -164,7 +164,7 @@ let main argv =
     let testResults = tests |> Seq.map runTest 
 
     let part1 = testResults 
-                    |> Seq.map (fun instructions -> Seq.length instructions) 
+                    |> Seq.map Seq.length
                     |> Seq.where (fun a -> a >= 3) 
                     |> Seq.length
 

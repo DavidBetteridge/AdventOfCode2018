@@ -33,6 +33,7 @@ namespace Day23
 
                 if (boxSize == 1)
                 {
+                    //125532607   you need to Add X to the x to get the correct value.  Some strange off-by-one error going on
                     Console.WriteLine($"Part 2 ({InRangeOf(nanobots, X, Y, Z)}) {DistanceToOrigin(X, Y, Z)}");
                     Console.ReadKey(true);
                 }

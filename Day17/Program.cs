@@ -31,15 +31,13 @@ namespace Day17
 
             WriteToFile(grid, minX);
 
-            //DisplayGrid(Console.Out, grid);
-
-
             AddWater(grid, minX);
-            //  DisplayGrid(grid);
             WriteToFile(grid, minX);
             var part1 = WorkOutScoreForPart1(grid, minY, maxY);
+            var part2 = WorkOutScoreForPart2(grid, minY, maxY);
 
-            Console.WriteLine(part1);
+            Console.WriteLine($"Part 1 is {part1}");
+            Console.WriteLine($"Part 2 is {part2}");
             Console.ReadKey();
         }
 
@@ -144,6 +142,22 @@ namespace Day17
             }
             return score;
         }
+
+        private static int WorkOutScoreForPart2(char[,] grid, int minY, int maxY)
+        {
+            var score = 0;
+            for (int y = minY; y < maxY; y++)
+            {
+                for (int x = 0; x <= grid.GetUpperBound(0); x++)
+                {
+                    if (grid[x, y] == Squares.WaterAtRest)
+                        score++;
+                }
+            }
+            return score;
+        }
+
+
 
         private static void FlowRight(char[,] grid, int x, int y)
         {

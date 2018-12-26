@@ -9,7 +9,7 @@ namespace Day25
     {
         static void Main(string[] args)
         {
-             if (Part1("Sample1.txt") != 2) Console.WriteLine("Test 1 Failed");
+            if (Part1("Sample1.txt") != 2) Console.WriteLine("Test 1 Failed");
             if (Part1("Sample2.txt") != 4) Console.WriteLine("Test 2 Failed");
             if (Part1("Sample3.txt") != 3) Console.WriteLine("Test 3 Failed");
             if (Part1("Sample4.txt") != 8) Console.WriteLine("Test 4 Failed");

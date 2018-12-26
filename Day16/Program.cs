@@ -62,7 +62,7 @@ namespace Day16
                     }
                     if (numberOfMatches == 1)
                     {
-                        //Console.WriteLine($"{instruction.Method.Name} is {opCode}");
+                        Console.WriteLine($"{instruction.Method.Name} is {opCode}");
                         opCodesCouldBe.Remove(opCode);
                         opCodeMap[opCode] = instruction;
                     }
@@ -123,6 +123,7 @@ namespace Day16
                         opCodesCouldBe[opCode].Remove(instruction.Method.Name);
                 }
             }
+
             return matches;
         }
         static void addr(int A, int B, int C)
