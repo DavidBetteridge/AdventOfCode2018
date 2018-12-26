@@ -9,7 +9,7 @@ namespace Day24
         public int AttackDamage { get; set; }
         public string DamageType { get; set; }
         public int Initiative { get; set; }
-        
+
         public List<DefenceTypeAndStrength> DefenceTypes { get; set; }
 
         //Each group also has an effective power: the number of units in that group multiplied by their attack damage.

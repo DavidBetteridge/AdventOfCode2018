@@ -20,12 +20,13 @@ namespace Day24
             }
 
             if (immuneArmy.Any())
-                Console.WriteLine($"Part 1 is {immuneArmy.Sum(grp=>grp.Units)}");
+                Console.WriteLine($"Part 1 is {immuneArmy.Sum(grp => grp.Units)}");
 
             if (infectionArmy.Any())
                 Console.WriteLine($"Part 1 is {infectionArmy.Sum(grp => grp.Units)}");
 
-            //14294 too low
+            //5216
+            //15392
         }
 
         private static List<Group> RemoveDeadGroups(List<Group> army)
@@ -54,15 +55,12 @@ namespace Day24
                     defender.Units -= unitsDamaged;
                 }
             }
-
-
         }
 
         private static void TargetSelection(List<Group> immuneArmy, List<Group> infectionArmy)
         {
             SelectGroupsToAttack(immuneArmy, infectionArmy);
             SelectGroupsToAttack(infectionArmy, immuneArmy);
-
         }
 
         private static void SelectGroupsToAttack(List<Group> attackingArmy, List<Group> defendingArmy)
@@ -70,7 +68,7 @@ namespace Day24
             foreach (var target in defendingArmy)
                 target.UnderAttack = false;
 
-            foreach (var attacking in attackingArmy.OrderByDescending(army => army.EffectivePower).OrderBy(army => army.Initiative))
+            foreach (var attacking in attackingArmy.OrderByDescending(army => (army.EffectivePower, army.Initiative)))
             {
                 attacking.Target = null;
                 var possibleTargets = defendingArmy.Where(army => !army.UnderAttack);
@@ -80,9 +78,9 @@ namespace Day24
                                               .GroupBy(defending => Damage(attacking, defending))
                                               .MaxBy(grp => grp.Key)
                                               .Select(grp => grp)
-                                              .OrderByDescending(grp => grp.EffectivePower)
-                                              .ThenByDescending(grp => grp.Initiative).FirstOrDefault();
-                    if (target != null)
+                                              .OrderByDescending(grp => (grp.EffectivePower, grp.Initiative))
+                                              .FirstOrDefault();
+                    if (target != null && Damage(attacking, target) > 0)
                     {
                         target.UnderAttack = true;
                         attacking.Target = target;
@@ -139,5 +137,4 @@ namespace Day24
 
     }
 }
-
 
